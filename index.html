@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方塊排列</title>
+    <script type="module">
+        // Firebase 模組化 SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        // Firebase 配置
+        const firebaseConfig = {
+           apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
+  authDomain: "ratocar-4e2ea.firebaseapp.com",
+  databaseURL: "https://ratocar-4e2ea-default-rtdb.firebaseio.com",
+  projectId: "ratocar-4e2ea",
+  storageBucket: "ratocar-4e2ea.firebasestorage.app",
+  messagingSenderId: "798151277741",
+  appId: "1:798151277741:web:b1774d7e5449303845da24",
+  measurementId: "G-G7BBW1XSGR"
+        };
+
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // 當頁面加載時，根據 Firebase 恢復顏色狀態
+        window.onload = function() {
+            const allCells = document.querySelectorAll('td');
+            allCells.forEach(cell => {
+                const id = cell.id;
+                const colorRef = ref(db, id);
+                get(colorRef).then(snapshot => {
+                    const color = snapshot.val();
+                    if (color) {
+                        cell.classList.remove('green', 'red');
+                        cell.classList.add(color);
+                    }
+                });
+            });
+        };
+
+        // 函數來切換顏色並將顏色儲存到 Firebase
+        function toggleColor(element) {
+            let newColor = element.classList.contains('green') ? 'red' : 'green';
+            element.classList.remove('green', 'red');
+            element.classList.add(newColor);
+            const colorRef = ref(db, element.id);
+            set(colorRef, newColor);
+        }
+
+        // 暴露給 HTML 使用的函數
+        window.toggleColor = toggleColor;
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #000;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .green {
+            background-color: green;
+            color: white;
+        }
+        .red {
+            background-color: red;
+            color: white;
+        }
+        .first-row td {
+            width: 20%;
+            height: 50px;
+        }
+        .second-row td {
+            width: 12.5%;
+            height: 120px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>1F</h2>
+    <table class="first-row">
+        <tr>
+            <td class="green" id="12" onclick="toggleColor(this)">12</td>
+            <td class="green" id="13" onclick="toggleColor(this)">13</td>
+            <td class="green" id="14" onclick="toggleColor(this)">14</td>
+            <td class="green" id="15" onclick="toggleColor(this)">15</td>
+            <td class="green" id="16" onclick="toggleColor(this)">16</td>
+        </tr>
+    </table>
+
+    <h2>B2</h2>
+    <table class="second-row">
+        <tr>
+            <td class="green" id="A09" onclick="toggleColor(this)">A09</td>
+            <td class="green" id="A10" onclick="toggleColor(this)">A10</td>
+            <td class="green" id="A24" onclick="toggleColor(this)">A24</td>
+            <td class="green" id="A25" onclick="toggleColor(this)">A25</td>
+            <td class="green" id="A26" onclick="toggleColor(this)">A26</td>
+            <td class="green" id="C02" onclick="toggleColor(this)">C02</td>
+            <td class="green" id="C04" onclick="toggleColor(this)">C04</td>
+            <td class="green" id="C21" onclick="toggleColor(this)">C21</td>
+        </tr>
+    </table>
+
+</body>
+</html>
