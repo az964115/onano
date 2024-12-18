@@ -66,79 +66,18 @@
 
         function toggleColor(element) {
             if (element.classList.contains('green')) {
-                showUserSelect(element);
-            } else {
-                showUserSelect(element);
-            }
-        }
-
-        function showUserSelect(element) {
-            const userSelect = document.createElement("select");
-            const users = [
-                '蘇總', '蔡祐宸', '周鶴娟', '劉力綸', '沈虹君', '董鴻耀', 
-                '丁木輝', '張雅玲', '張世華', '葉偉仁', '吳振銘', '鄭怡惠', 
-                '許民榆', '劉邦緯', '李家駿'
-            ];
-
-            users.forEach(user => {
-                const option = document.createElement("option");
-                option.value = user;
-                option.textContent = user;
-                userSelect.appendChild(option);
-            });
-
-            const cancelButton = document.createElement("button");
-            cancelButton.textContent = "取消登記";
-            cancelButton.onclick = function() {
+                element.classList.remove('green');
+                element.classList.add('red');
+                element.textContent = `${element.id}-使用中`; // 顯示使用中的狀態
+                const colorRef = ref(db, element.id);
+                set(colorRef, { color: 'red' });
+            } else if (element.classList.contains('red')) {
                 element.classList.remove('red');
                 element.classList.add('green');
-                element.textContent = element.id;
-
+                element.textContent = `${element.id}`; // 恢復為空閒狀態
                 const colorRef = ref(db, element.id);
                 set(colorRef, { color: 'green' });
-
-                const now = new Date();
-                const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-                records.push({ id: element.id, action: '取消登記', time: timestamp });
-
-                document.body.removeChild(overlay);
-            };
-
-            const confirmButton = document.createElement("button");
-            confirmButton.textContent = "確認";
-            confirmButton.onclick = function() {
-                const selectedUser = userSelect.value;
-                const newColor = 'red';
-                element.classList.remove('green', 'red');
-                element.classList.add(newColor);
-                element.textContent = `${element.id}-${selectedUser}`;
-
-                const colorRef = ref(db, element.id);
-                set(colorRef, { color: newColor, user: selectedUser });
-
-                const now = new Date();
-                const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-                records.push({ id: element.id, action: '登記用戶', user: selectedUser, time: timestamp });
-
-                document.body.removeChild(overlay);
-            };
-
-            const overlay = document.createElement("div");
-            overlay.style.position = "fixed";
-            overlay.style.top = "0";
-            overlay.style.left = "0";
-            overlay.style.width = "100%";
-            overlay.style.height = "100%";
-            overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-            overlay.style.display = "flex";
-            overlay.style.justifyContent = "center";
-            overlay.style.alignItems = "center";
-            overlay.style.zIndex = "1000";
-            document.body.appendChild(overlay);
-
-            overlay.appendChild(userSelect);
-            overlay.appendChild(confirmButton);
-            overlay.appendChild(cancelButton);
+            }
         }
 
         function showRecords() {
@@ -229,7 +168,7 @@
             margin-bottom: 20px;
             text-align: center;
             display: flex;
-            justify-content: space-between; /* 使標題和時間並排 */
+            justify-content: space-between;
             align-items: center;
             width: 100%;
         }
@@ -244,7 +183,7 @@
 <body>
 
     <h1>
-        RATO瑞統停車管理
+        iTEST瑞統停車管理
         <span id="datetime"></span>
     </h1>
 
@@ -265,8 +204,15 @@
             <td class="green" id="A09" onclick="toggleColor(this)">A09</td>
             <td class="green" id="A10" onclick="toggleColor(this)">A10</td>
             <td class="green" id="A24" onclick="toggleColor(this)">A24</td>
-            <td class="green" id="A25" onclick="toggleColor(this)">A25</td>
-            <td class="green" id="A26" onclick="toggleColor(this)">A26</td>
+            <td class="green" id="A23" onclick="toggleColor(this)">A25</td>
+            <td class="green" id="A22" onclick="toggleColor(this)">A26</td>
+        </tr>
+    </table>
+
+    <!-- 新增一排 B2-1 -->
+    <h2>B2</h2>
+    <table class="second-row">
+        <tr>
             <td class="green" id="C02" onclick="toggleColor(this)">C02</td>
             <td class="green" id="C04" onclick="toggleColor(this)">C04</td>
             <td class="green" id="C21" onclick="toggleColor(this)">C21</td>
