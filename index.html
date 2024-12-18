@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>瑞統停車:小劉製</title>
     <script type="module">
-        // 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
-        // 
         const firebaseConfig = {
             apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
             authDomain: "ratocar-4e2ea.firebaseapp.com",
@@ -21,14 +19,11 @@
             measurementId: "G-G7BBW1XSGR"
         };
 
-        // 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 
         const records = [];
 
-        // 
         window.onload = function() {
             const allCells = document.querySelectorAll('td');
             allCells.forEach(cell => {
@@ -37,30 +32,25 @@
                 get(colorRef).then(snapshot => {
                     const data = snapshot.val();
                     if (data) {
-                        // 
                         cell.classList.remove('green', 'red');
                         cell.classList.add(data.color);
                         if (data.color === 'red') {
-                            cell.textContent = `${id}-${data.user}`; // 
+                            cell.textContent = `${id}-${data.user}`;
                         } else {
-                            cell.textContent = `${id}`; // 
+                            cell.textContent = `${id}`;
                         }
                     } else {
-                        // 
                         cell.classList.remove('green', 'red');
                         cell.classList.add('green');
-                        cell.textContent = `${id}`; // 
+                        cell.textContent = `${id}`;
                     }
                 });
             });
 
-            // 
             displayDateTime();
-            // 
             setInterval(displayDateTime, 1000);
         };
 
-        // 
         function displayDateTime() {
             const now = new Date();
             const year = now.getFullYear();
@@ -74,25 +64,21 @@
             document.getElementById('datetime').textContent = dateTime;
         }
 
-        // 
         function toggleColor(element) {
             if (element.classList.contains('green')) {
-                // 
                 showUserSelect(element);
             } else {
-                // 
                 showUserSelect(element);
             }
         }
 
-        // 
         function showUserSelect(element) {
             const userSelect = document.createElement("select");
             const users = [
                 '蘇總', '蔡祐宸', '周鶴娟', '劉力綸', '沈虹君', '董鴻耀', 
                 '丁木輝', '張雅玲', '張世華', '葉偉仁', '吳振銘', '鄭怡惠', 
                 '許民榆', '劉邦緯', '李家駿'
-            ]; // 
+            ];
 
             users.forEach(user => {
                 const option = document.createElement("option");
@@ -101,29 +87,23 @@
                 userSelect.appendChild(option);
             });
 
-            // 
             const cancelButton = document.createElement("button");
             cancelButton.textContent = "取消登記";
             cancelButton.onclick = function() {
-                // 
                 element.classList.remove('red');
                 element.classList.add('green');
-                element.textContent = element.id; // 
+                element.textContent = element.id;
 
-                // 
                 const colorRef = ref(db, element.id);
                 set(colorRef, { color: 'green' });
 
-                // 
                 const now = new Date();
                 const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
                 records.push({ id: element.id, action: '取消登記', time: timestamp });
 
-                // 
                 document.body.removeChild(overlay);
             };
 
-            // 
             const confirmButton = document.createElement("button");
             confirmButton.textContent = "確認";
             confirmButton.onclick = function() {
@@ -131,22 +111,18 @@
                 const newColor = 'red';
                 element.classList.remove('green', 'red');
                 element.classList.add(newColor);
-                element.textContent = `${element.id}-${selectedUser}`; // 
+                element.textContent = `${element.id}-${selectedUser}`;
 
-                // 
                 const colorRef = ref(db, element.id);
                 set(colorRef, { color: newColor, user: selectedUser });
 
-                // 
                 const now = new Date();
                 const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
                 records.push({ id: element.id, action: '登記用戶', user: selectedUser, time: timestamp });
 
-                // 
                 document.body.removeChild(overlay);
             };
 
-            // 
             const overlay = document.createElement("div");
             overlay.style.position = "fixed";
             overlay.style.top = "0";
@@ -160,23 +136,19 @@
             overlay.style.zIndex = "1000";
             document.body.appendChild(overlay);
 
-            // 
             overlay.appendChild(userSelect);
             overlay.appendChild(confirmButton);
             overlay.appendChild(cancelButton);
         }
 
-        // 
         function showRecords() {
-            // 
             const filteredRecords = records.filter(record => {
                 const recordTime = new Date(record.time);
                 const currentTime = new Date();
-                const timeDiff = (currentTime - recordTime) / (1000 * 3600 * 24); // 
-                return timeDiff <= 3; // 
+                const timeDiff = (currentTime - recordTime) / (1000 * 3600 * 24);
+                return timeDiff <= 3;
             });
 
-            // 
             const recordContainer = document.createElement("div");
             recordContainer.style.position = "fixed";
             recordContainer.style.top = "0";
@@ -210,9 +182,8 @@
             recordContainer.appendChild(closeButton);
         }
 
-        // 
         window.toggleColor = toggleColor;
-        window.showRecords = showRecords;  // 新增顯示紀錄功能
+        window.showRecords = showRecords;
     </script>
     <style>
         body {
@@ -252,31 +223,26 @@
             height: 120px;
         }
 
-        /*  */
         h1 {
-            font-family: 'DFKai-SB', "標楷體", serif; /*  */
-            font-size: 32px; /* */
+            font-family: 'DFKai-SB', "標楷體", serif;
+            font-size: 32px;
             margin-bottom: 20px;
             text-align: center;
             display: flex;
-            justify-content: center;
+            justify-content: space-between; /* 使標題和時間並排 */
             align-items: center;
             width: 100%;
         }
 
-        /*  */
         #datetime {
             font-size: 18px;
             font-family: 'Arial', sans-serif;
             margin-left: 20px;
-            position: absolute;
-            right: 20px; /*  */
         }
     </style>
 </head>
 <body>
 
-    <!--  -->
     <h1>
         RATO瑞統停車管理
         <span id="datetime"></span>
@@ -309,7 +275,7 @@
         </tr>
     </table>
 
-    <button onclick="showRecords()">顯示紀錄</button>
+    <button onclick="showRecords()">顯示紀錄(開發中)</button>
 
 </body>
 </html>
