@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>瑞統停車</title>
+    <title>方塊排列</title>
     <script type="module">
         // Firebase 模組化 SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -24,6 +24,9 @@
         // 初始化 Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
+        // 紀錄登記和取消的事件
+        const records = [];
 
         // 當頁面加載時，根據 Firebase 恢復顏色狀態
         window.onload = function() {
@@ -53,6 +56,8 @@
 
             // 顯示當前日期和時間
             displayDateTime();
+            // 每秒更新一次時間
+            setInterval(displayDateTime, 1000);
         };
 
         // 顯示當前日期和時間
@@ -109,6 +114,11 @@
                 const colorRef = ref(db, element.id);
                 set(colorRef, { color: 'green' });
 
+                // 記錄取消登記的事件
+                const now = new Date();
+                const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+                records.push({ id: element.id, action: '取消登記', time: timestamp });
+
                 // 隱藏選擇框
                 document.body.removeChild(overlay);
             };
@@ -126,6 +136,11 @@
                 // 儲存顏色和用戶名稱到 Firebase
                 const colorRef = ref(db, element.id);
                 set(colorRef, { color: newColor, user: selectedUser });
+
+                // 記錄登記的事件
+                const now = new Date();
+                const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+                records.push({ id: element.id, action: '登記用戶', user: selectedUser, time: timestamp });
 
                 // 隱藏選擇框
                 document.body.removeChild(overlay);
@@ -151,24 +166,53 @@
             overlay.appendChild(cancelButton);
         }
 
-        // 重製所有格子的顏色為綠色
-        function resetColors() {
-            const userConfirmed = confirm("是否確定要重製所有車位?");
-            if (userConfirmed) {
-                const allCells = document.querySelectorAll('td');
-                allCells.forEach(cell => {
-                    cell.classList.remove('green', 'red');
-                    cell.classList.add('green');
-                    cell.textContent = cell.id; // 顯示車位ID
-                    const colorRef = ref(db, cell.id);
-                    set(colorRef, { color: 'green' }); // 儲存為綠色
-                });
-            }
+        // 顯示紀錄
+        function showRecords() {
+            // 過濾超過三天的紀錄
+            const filteredRecords = records.filter(record => {
+                const recordTime = new Date(record.time);
+                const currentTime = new Date();
+                const timeDiff = (currentTime - recordTime) / (1000 * 3600 * 24); // 計算時間差（天數）
+                return timeDiff <= 3; // 保留三天內的紀錄
+            });
+
+            // 彈出框顯示紀錄
+            const recordContainer = document.createElement("div");
+            recordContainer.style.position = "fixed";
+            recordContainer.style.top = "0";
+            recordContainer.style.left = "0";
+            recordContainer.style.width = "100%";
+            recordContainer.style.height = "100%";
+            recordContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+            recordContainer.style.display = "flex";
+            recordContainer.style.justifyContent = "center";
+            recordContainer.style.alignItems = "center";
+            recordContainer.style.zIndex = "1000";
+            document.body.appendChild(recordContainer);
+
+            const recordList = document.createElement("ul");
+            filteredRecords.forEach(record => {
+                const recordItem = document.createElement("li");
+                if (record.user) {
+                    recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${record.time}`;
+                } else {
+                    recordItem.textContent = `${record.id} - ${record.action} - ${record.time}`;
+                }
+                recordList.appendChild(recordItem);
+            });
+            recordContainer.appendChild(recordList);
+
+            const closeButton = document.createElement("button");
+            closeButton.textContent = "關閉";
+            closeButton.onclick = function() {
+                document.body.removeChild(recordContainer);
+            };
+            recordContainer.appendChild(closeButton);
         }
 
         // 暴露給 HTML 使用的函數
         window.toggleColor = toggleColor;
-        window.resetColors = resetColors;  // 新增重製功能
+        window.showRecords = showRecords;  // 新增顯示紀錄功能
     </script>
     <style>
         body {
@@ -208,22 +252,25 @@
             height: 120px;
         }
 
-        /* 修改的標題樣式，置中並使用標楷體 */
+        /* 修改的標題樣式，置中並使用標楷體，縮小字型 */
         h1 {
-            text-align: center;
             font-family: 'DFKai-SB', "標楷體", serif; /* 使用標楷體字型 */
-            font-size: 36px;
+            font-size: 32px; /* 縮小一號 */
             margin-bottom: 20px;
+            text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100%;
         }
 
-        /* 用於顯示日期和時間的區域 */
+        /* 用於顯示日期和時間的區域，位於最右邊 */
         #datetime {
             font-size: 18px;
             font-family: 'Arial', sans-serif;
-            margin-left: 20px; /* 讓日期和時間略微向右偏移 */
+            margin-left: 20px;
+            position: absolute;
+            right: 20px; /* 將時間顯示在最右邊 */
         }
     </style>
 </head>
@@ -252,16 +299,17 @@
             <td class="green" id="A09" onclick="toggleColor(this)">A09</td>
             <td class="green" id="A10" onclick="toggleColor(this)">A10</td>
             <td class="green" id="A24" onclick="toggleColor(this)">A24</td>
-            <td class="green" id="A25" onclick="toggleColor(this)">A25</td>
-            <td class="green" id="A26" onclick="toggleColor(this)">A26</td>
-            <td class="green" id="C02" onclick="toggleColor(this)">C02</td>
-            <td class="green" id="C04" onclick="toggleColor(this)">C04</td>
-            <td class="green" id="C21" onclick="toggleColor(this)">C21</td>
+            <td class="green" id="A23" onclick="toggleColor(this)">A23</td>
+            <td class="green" id="A22" onclick="toggleColor(this)">A22</td>
+            <td class="green" id="A21" onclick="toggleColor(this)">A21</td>
+            <td class="green" id="A20" onclick="toggleColor(this)">A20</td>
+            <td class="green" id="A19" onclick="toggleColor(this)">A19</td>
+            <td class="green" id="A18" onclick="toggleColor(this)">A18</td>
+            <td class="green" id="A17" onclick="toggleColor(this)">A17</td>
         </tr>
     </table>
 
-    <!-- 重製按鈕 -->
-    <button onclick="resetColors()">重製所有車位</button>
+    <button onclick="showRecords()">顯示紀錄</button>
 
 </body>
 </html>
