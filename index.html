@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>方塊排列</title>
+    <title>瑞統停車</title>
     <script type="module">
         // Firebase 模組化 SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -11,14 +11,14 @@
 
         // Firebase 配置
         const firebaseConfig = {
-           apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
-  authDomain: "ratocar-4e2ea.firebaseapp.com",
-  databaseURL: "https://ratocar-4e2ea-default-rtdb.firebaseio.com",
-  projectId: "ratocar-4e2ea",
-  storageBucket: "ratocar-4e2ea.firebasestorage.app",
-  messagingSenderId: "798151277741",
-  appId: "1:798151277741:web:b1774d7e5449303845da24",
-  measurementId: "G-G7BBW1XSGR"
+            apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
+            authDomain: "ratocar-4e2ea.firebaseapp.com",
+            databaseURL: "https://ratocar-4e2ea-default-rtdb.firebaseio.com",
+            projectId: "ratocar-4e2ea",
+            storageBucket: "ratocar-4e2ea.firebasestorage.app",
+            messagingSenderId: "798151277741",
+            appId: "1:798151277741:web:b1774d7e5449303845da24",
+            measurementId: "G-G7BBW1XSGR"
         };
 
         // 初始化 Firebase
@@ -32,26 +32,143 @@
                 const id = cell.id;
                 const colorRef = ref(db, id);
                 get(colorRef).then(snapshot => {
-                    const color = snapshot.val();
-                    if (color) {
+                    const data = snapshot.val();
+                    if (data) {
+                        // 如果有資料，顯示顏色和用戶
                         cell.classList.remove('green', 'red');
-                        cell.classList.add(color);
+                        cell.classList.add(data.color);
+                        if (data.color === 'red') {
+                            cell.textContent = `${id}-${data.user}`; // 顯示ID-用戶名稱
+                        } else {
+                            cell.textContent = `${id}`; // 顯示ID
+                        }
+                    } else {
+                        // 如果沒有資料，預設為綠色
+                        cell.classList.remove('green', 'red');
+                        cell.classList.add('green');
+                        cell.textContent = `${id}`; // 顯示車位ID
                     }
                 });
             });
+
+            // 顯示當前日期和時間
+            displayDateTime();
         };
 
-        // 函數來切換顏色並將顏色儲存到 Firebase
+        // 顯示當前日期和時間
+        function displayDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const dateTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('datetime').textContent = dateTime;
+        }
+
+        // 函數來切換顏色並將顏色和用戶儲存到 Firebase
         function toggleColor(element) {
-            let newColor = element.classList.contains('green') ? 'red' : 'green';
-            element.classList.remove('green', 'red');
-            element.classList.add(newColor);
-            const colorRef = ref(db, element.id);
-            set(colorRef, newColor);
+            if (element.classList.contains('green')) {
+                // 如果格子是綠色，顯示車位ID，並且讓用戶能夠選擇
+                showUserSelect(element);
+            } else {
+                // 如果是紅色，顯示下拉選單，讓用戶選擇
+                showUserSelect(element);
+            }
+        }
+
+        // 顯示用戶選擇下拉框
+        function showUserSelect(element) {
+            const userSelect = document.createElement("select");
+            const users = [
+                '蘇總', '蔡祐宸', '周鶴娟', '劉力綸', '沈虹君', '董鴻耀', 
+                '丁木輝', '張雅玲', '張世華', '葉偉仁', '吳振銘', '鄭怡惠', 
+                '許民榆', '劉邦緯', '李家駿'
+            ]; // 更新的用戶名單
+
+            users.forEach(user => {
+                const option = document.createElement("option");
+                option.value = user;
+                option.textContent = user;
+                userSelect.appendChild(option);
+            });
+
+            // 創建取消登記按鈕
+            const cancelButton = document.createElement("button");
+            cancelButton.textContent = "取消登記";
+            cancelButton.onclick = function() {
+                // 按下取消登記後，恢復格子為綠色，並只顯示車位ID
+                element.classList.remove('red');
+                element.classList.add('green');
+                element.textContent = element.id; // 只顯示車位ID
+
+                // 儲存為綠色並清除用戶
+                const colorRef = ref(db, element.id);
+                set(colorRef, { color: 'green' });
+
+                // 隱藏選擇框
+                document.body.removeChild(overlay);
+            };
+
+            // 創建確認按鈕
+            const confirmButton = document.createElement("button");
+            confirmButton.textContent = "確認";
+            confirmButton.onclick = function() {
+                const selectedUser = userSelect.value;
+                const newColor = 'red';
+                element.classList.remove('green', 'red');
+                element.classList.add(newColor);
+                element.textContent = `${element.id}-${selectedUser}`; // 顯示ID-用戶
+
+                // 儲存顏色和用戶名稱到 Firebase
+                const colorRef = ref(db, element.id);
+                set(colorRef, { color: newColor, user: selectedUser });
+
+                // 隱藏選擇框
+                document.body.removeChild(overlay);
+            };
+
+            // 創建選擇框
+            const overlay = document.createElement("div");
+            overlay.style.position = "fixed";
+            overlay.style.top = "0";
+            overlay.style.left = "0";
+            overlay.style.width = "100%";
+            overlay.style.height = "100%";
+            overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+            overlay.style.display = "flex";
+            overlay.style.justifyContent = "center";
+            overlay.style.alignItems = "center";
+            overlay.style.zIndex = "1000";
+            document.body.appendChild(overlay);
+
+            // 創建選擇框
+            overlay.appendChild(userSelect);
+            overlay.appendChild(confirmButton);
+            overlay.appendChild(cancelButton);
+        }
+
+        // 重製所有格子的顏色為綠色
+        function resetColors() {
+            const userConfirmed = confirm("是否確定要重製所有車位?");
+            if (userConfirmed) {
+                const allCells = document.querySelectorAll('td');
+                allCells.forEach(cell => {
+                    cell.classList.remove('green', 'red');
+                    cell.classList.add('green');
+                    cell.textContent = cell.id; // 顯示車位ID
+                    const colorRef = ref(db, cell.id);
+                    set(colorRef, { color: 'green' }); // 儲存為綠色
+                });
+            }
         }
 
         // 暴露給 HTML 使用的函數
         window.toggleColor = toggleColor;
+        window.resetColors = resetColors;  // 新增重製功能
     </script>
     <style>
         body {
@@ -90,9 +207,33 @@
             width: 12.5%;
             height: 120px;
         }
+
+        /* 修改的標題樣式，置中並使用標楷體 */
+        h1 {
+            text-align: center;
+            font-family: 'DFKai-SB', "標楷體", serif; /* 使用標楷體字型 */
+            font-size: 36px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 用於顯示日期和時間的區域 */
+        #datetime {
+            font-size: 18px;
+            font-family: 'Arial', sans-serif;
+            margin-left: 20px; /* 讓日期和時間略微向右偏移 */
+        }
     </style>
 </head>
 <body>
+
+    <!-- 新增的標題，置中並顯示時間 -->
+    <h1>
+        RATO瑞統停車管理
+        <span id="datetime"></span>
+    </h1>
 
     <h2>1F</h2>
     <table class="first-row">
@@ -118,6 +259,9 @@
             <td class="green" id="C21" onclick="toggleColor(this)">C21</td>
         </tr>
     </table>
+
+    <!-- 重製按鈕 -->
+    <button onclick="resetColors()">重製所有車位</button>
 
 </body>
 </html>
