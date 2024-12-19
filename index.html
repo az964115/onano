@@ -6,7 +6,7 @@
     <title>瑞統停車:小劉製</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, set, get, push, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
@@ -23,7 +23,6 @@
         const db = getDatabase(app);
         const recordsRef = ref(db, 'records');
 
-        // 
         const users = [
             "蘇總", "蔡祐宸", "葉偉仁", "周鶴娟", "丁木輝", "劉力綸", 
             "沈虹君", "董鴻耀", "張雅玲", "張世華", "吳振銘", "鄭怡惠", "許民榆", 
@@ -31,7 +30,7 @@
         ];
 
         window.onload = function() {
-            // 
+            // 用戶選擇部分
             const userSelect = document.getElementById("userSelect");
             users.forEach(user => {
                 const option = document.createElement("option");
@@ -40,44 +39,24 @@
                 userSelect.appendChild(option);
             });
 
-            // 
             const savedUser = localStorage.getItem("selectedUser");
             if (savedUser) {
                 userSelect.value = savedUser;
             }
 
-            // 
             userSelect.addEventListener("change", (e) => {
                 localStorage.setItem("selectedUser", e.target.value);
             });
 
-            // 
-            const allCells = document.querySelectorAll('td');
-            allCells.forEach(cell => {
-                const id = cell.id;
-                const colorRef = ref(db, id);
-                get(colorRef).then(snapshot => {
-                    const data = snapshot.val();
-                    if (data) {
-                        cell.classList.remove('green', 'red');
-                        cell.classList.add(data.color);
-                        if (data.color === 'red') {
-                            cell.textContent = `${id} - ${data.user}`;
-                        } else {
-                            cell.textContent = `${id}`;
-                        }
-                    } else {
-                        cell.classList.remove('green', 'red');
-                        cell.classList.add('green');
-                        cell.textContent = `${id}`;
-                    }
-                });
-            });
+            // 每秒刷新方塊狀態
+            setInterval(updateBlockStatus, 1000);
 
+            // 顯示時間
             displayDateTime();
             setInterval(displayDateTime, 1000);
         };
 
+        // 顯示當前日期時間
         function displayDateTime() {
             const now = new Date();
             const options = {
@@ -95,6 +74,32 @@
             document.getElementById('datetime').textContent = dateTime;
         }
 
+        // 更新所有方塊狀態
+        function updateBlockStatus() {
+            const allCells = document.querySelectorAll('td');
+            allCells.forEach(cell => {
+                const id = cell.id;
+                const colorRef = ref(db, id);
+                onValue(colorRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        cell.classList.remove('green', 'red');
+                        cell.classList.add(data.color);
+                        if (data.color === 'red') {
+                            cell.textContent = `${id} - ${data.user}`;
+                        } else {
+                            cell.textContent = `${id}`;
+                        }
+                    } else {
+                        cell.classList.remove('green', 'red');
+                        cell.classList.add('green');
+                        cell.textContent = `${id}`;
+                    }
+                });
+            });
+        }
+
+        // 切換方塊顏色
         function toggleColor(element) {
             const id = element.id;
             const selectedUser = document.getElementById("userSelect").value;
@@ -112,7 +117,6 @@
                 const colorRef = ref(db, id);
                 set(colorRef, { color: 'red', user: selectedUser });
 
-                // 
                 const newRecord = {
                     id: id,
                     action: '使用中',
@@ -140,6 +144,7 @@
             }
         }
 
+        // 顯示紀錄
         function showRecords() {
             onValue(recordsRef, (snapshot) => {
                 const records = snapshot.val();
@@ -296,7 +301,6 @@
         <span id="datetime"></span>
     </h1>
 
-    <!--  -->
     <div>
         <label for="userSelect">選擇用戶: </label>
         <select id="userSelect">
@@ -336,6 +340,6 @@
     </table>
 
     <button onclick="showRecords()">顯示紀錄</button>
-    
+
 </body>
 </html>
