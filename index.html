@@ -35,7 +35,7 @@
                         cell.classList.remove('green', 'red');
                         cell.classList.add(data.color);
                         if (data.color === 'red') {
-                            cell.textContent = `${id}-use`; // 顯示 "use"
+                            cell.textContent = `${id}-use`; // 
                         } else {
                             cell.textContent = `${id}`;
                         }
@@ -67,15 +67,15 @@
         function toggleColor(element) {
             const id = element.id;
             if (element.classList.contains('green')) {
-                // 綠色轉紅色
+                // 
                 element.classList.remove('green');
                 element.classList.add('red');
-                element.textContent = `${id}-use`; // 顯示 "use"
+                element.textContent = `${id}-use`; // 
 
                 const colorRef = ref(db, id);
                 set(colorRef, { color: 'red' });
 
-                // 紀錄 IP 地址
+                // 
                 getUserIP().then(ip => {
                     const record = {
                         id: id,
@@ -85,19 +85,19 @@
                     };
                     records.push(record);
 
-                    // 儲存到 localStorage 中
+                    // 
                     localStorage.setItem("parkingRecords", JSON.stringify(records));
                 });
             } else if (element.classList.contains('red')) {
-                // 紅色轉綠色
+                // 
                 element.classList.remove('red');
                 element.classList.add('green');
-                element.textContent = `${id}`; // 還原為原本顯示的編號
+                element.textContent = `${id}`; //
 
                 const colorRef = ref(db, id);
                 set(colorRef, { color: 'green' });
 
-                // 紀錄 IP 地址
+                // 
                 getUserIP().then(ip => {
                     const record = {
                         id: id,
@@ -107,7 +107,7 @@
                     };
                     records.push(record);
 
-                    // 儲存到 localStorage 中
+                    // 
                     localStorage.setItem("parkingRecords", JSON.stringify(records));
                 });
             }
@@ -117,22 +117,22 @@
             return fetch('https://api.ipify.org?format=json')
                 .then(response => response.json())
                 .then(data => data.ip)
-                .catch(() => '無法取得IP');  // 如果無法獲取IP，返回 '無法取得IP'
+                .catch(() => '無法取得IP');  // 
         }
 
         function showRecords() {
-            // 過濾過去三天內的紀錄
+            // 
             const filteredRecords = records.filter(record => {
                 const recordTime = new Date(record.time);
                 const currentTime = new Date();
-                const timeDiff = (currentTime - recordTime) / (1000 * 3600 * 24); // 轉換為天數
+                const timeDiff = (currentTime - recordTime) / (1000 * 3600 * 24); // 
                 return timeDiff <= 3;
             });
 
-            // 將紀錄倒序顯示，最新的紀錄在最上面
+            // 
             filteredRecords.reverse();
 
-            // 顯示紀錄的對話框
+            // 
             const modal = document.createElement("div");
             modal.classList.add("modal");
 
@@ -221,7 +221,7 @@
             margin-left: 20px;
         }
 
-        /* Modal styles */
+        /* s */
         .modal {
             position: fixed;
             top: 0;
@@ -300,7 +300,7 @@
         </tr>
     </table>
 
-    <!-- 新增一排 B2-1 -->
+    <!--  -->
     <h2>B2</h2>
     <table class="second-row">
         <tr>
