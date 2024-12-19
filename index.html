@@ -6,7 +6,7 @@
     <title>瑞統停車:小劉製</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, set, get, push, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
@@ -22,7 +22,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const records = JSON.parse(localStorage.getItem("parkingRecords")) || [];
+        // 當前紀錄節點的引用
+        const recordsRef = ref(db, 'records');
 
         window.onload = function() {
             const allCells = document.querySelectorAll('td');
@@ -35,7 +36,7 @@
                         cell.classList.remove('green', 'red');
                         cell.classList.add(data.color);
                         if (data.color === 'red') {
-                            cell.textContent = `${id}-use`; // 
+                            cell.textContent = `${id}-use`;
                         } else {
                             cell.textContent = `${id}`;
                         }
@@ -53,62 +54,60 @@
 
         function displayDateTime() {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const options = {
+                timeZone: 'Asia/Taipei',  // 設定時區為台灣時間
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false  // 使用24小時制
+            };
 
-            const dateTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+            const dateTime = now.toLocaleString('zh-TW', options);
             document.getElementById('datetime').textContent = dateTime;
         }
 
         function toggleColor(element) {
             const id = element.id;
             if (element.classList.contains('green')) {
-                // 
                 element.classList.remove('green');
                 element.classList.add('red');
-                element.textContent = `${id}-use`; // 
+                element.textContent = `${id}-use`;
 
                 const colorRef = ref(db, id);
                 set(colorRef, { color: 'red' });
 
-                // 
                 getUserIP().then(ip => {
-                    const record = {
+                    const newRecord = {
                         id: id,
                         action: '使用中',
                         user: ip,
                         time: new Date().toISOString()
                     };
-                    records.push(record);
 
-                    // 
-                    localStorage.setItem("parkingRecords", JSON.stringify(records));
+                    // 使用 push 將紀錄寫入 Firebase
+                    push(recordsRef, newRecord);
                 });
             } else if (element.classList.contains('red')) {
-                // 
                 element.classList.remove('red');
                 element.classList.add('green');
-                element.textContent = `${id}`; //
+                element.textContent = `${id}`;
 
                 const colorRef = ref(db, id);
                 set(colorRef, { color: 'green' });
 
-                // 
                 getUserIP().then(ip => {
-                    const record = {
+                    const newRecord = {
                         id: id,
                         action: '空閒',
                         user: ip,
                         time: new Date().toISOString()
                     };
-                    records.push(record);
 
-                    // 
-                    localStorage.setItem("parkingRecords", JSON.stringify(records));
+                    // 使用 push 將紀錄寫入 Firebase
+                    push(recordsRef, newRecord);
                 });
             }
         }
@@ -117,50 +116,61 @@
             return fetch('https://api.ipify.org?format=json')
                 .then(response => response.json())
                 .then(data => data.ip)
-                .catch(() => '無法取得IP');  // 
+                .catch(() => '無法取得IP');
         }
 
         function showRecords() {
-            // 
-            const filteredRecords = records.filter(record => {
-                const recordTime = new Date(record.time);
-                const currentTime = new Date();
-                const timeDiff = (currentTime - recordTime) / (1000 * 3600 * 24); // 
-                return timeDiff <= 3;
+            // 從 Firebase 獲取紀錄
+            onValue(recordsRef, (snapshot) => {
+                const records = snapshot.val();
+                if (!records) return;
+
+                // 將紀錄轉換為陣列並顯示
+                const filteredRecords = Object.values(records).reverse();
+
+                // 建立並顯示模態對話框
+                const modal = document.createElement("div");
+                modal.classList.add("modal");
+
+                const modalContent = document.createElement("div");
+                modalContent.classList.add("modal-content");
+
+                const closeButton = document.createElement("button");
+                closeButton.textContent = "關閉";
+                closeButton.classList.add("close-btn");
+                closeButton.onclick = function() {
+                    document.body.removeChild(modal);
+                };
+
+                const recordList = document.createElement("ul");
+                filteredRecords.forEach(record => {
+                    const recordItem = document.createElement("li");
+                    const recordTime = new Date(record.time);
+                    const options = {
+                        timeZone: 'Asia/Taipei',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    };
+                    const localTime = recordTime.toLocaleString('zh-TW', options);
+
+                    if (record.user) {
+                        recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${localTime}`;
+                    } else {
+                        recordItem.textContent = `${record.id} - ${record.action} - ${localTime}`;
+                    }
+                    recordList.appendChild(recordItem);
+                });
+
+                modalContent.appendChild(closeButton);
+                modalContent.appendChild(recordList);
+                modal.appendChild(modalContent);
+                document.body.appendChild(modal);
             });
-
-            // 
-            filteredRecords.reverse();
-
-            // 
-            const modal = document.createElement("div");
-            modal.classList.add("modal");
-
-            const modalContent = document.createElement("div");
-            modalContent.classList.add("modal-content");
-
-            const closeButton = document.createElement("button");
-            closeButton.textContent = "關閉";
-            closeButton.classList.add("close-btn");
-            closeButton.onclick = function() {
-                document.body.removeChild(modal);
-            };
-
-            const recordList = document.createElement("ul");
-            filteredRecords.forEach(record => {
-                const recordItem = document.createElement("li");
-                if (record.user) {
-                    recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${record.time}`;
-                } else {
-                    recordItem.textContent = `${record.id} - ${record.action} - ${record.time}`;
-                }
-                recordList.appendChild(recordItem);
-            });
-
-            modalContent.appendChild(closeButton);
-            modalContent.appendChild(recordList);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
         }
 
         window.toggleColor = toggleColor;
@@ -221,7 +231,6 @@
             margin-left: 20px;
         }
 
-        /* s */
         .modal {
             position: fixed;
             top: 0;
@@ -300,7 +309,6 @@
         </tr>
     </table>
 
-    <!--  -->
     <h2>B2</h2>
     <table class="second-row">
         <tr>
