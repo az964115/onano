@@ -21,11 +21,37 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-
-        // 當前紀錄節點的引用
         const recordsRef = ref(db, 'records');
 
+        // 
+        const users = [
+            "蘇總", "蔡祐宸", "葉偉仁", "周鶴娟", "丁木輝", "劉力綸", 
+            "沈虹君", "董鴻耀", "張雅玲", "張世華", "吳振銘", "鄭怡惠", "許民榆", 
+            "劉邦緯", "李家駿"
+        ];
+
         window.onload = function() {
+            // 
+            const userSelect = document.getElementById("userSelect");
+            users.forEach(user => {
+                const option = document.createElement("option");
+                option.value = user;
+                option.textContent = user;
+                userSelect.appendChild(option);
+            });
+
+            // 
+            const savedUser = localStorage.getItem("selectedUser");
+            if (savedUser) {
+                userSelect.value = savedUser;
+            }
+
+            // 
+            userSelect.addEventListener("change", (e) => {
+                localStorage.setItem("selectedUser", e.target.value);
+            });
+
+            // 
             const allCells = document.querySelectorAll('td');
             allCells.forEach(cell => {
                 const id = cell.id;
@@ -36,7 +62,7 @@
                         cell.classList.remove('green', 'red');
                         cell.classList.add(data.color);
                         if (data.color === 'red') {
-                            cell.textContent = `${id}-use`;
+                            cell.textContent = `${id} - ${data.user}`;
                         } else {
                             cell.textContent = `${id}`;
                         }
@@ -55,14 +81,14 @@
         function displayDateTime() {
             const now = new Date();
             const options = {
-                timeZone: 'Asia/Taipei',  // 設定時區為台灣時間
+                timeZone: 'Asia/Taipei',
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit',
-                hour12: false  // 使用24小時制
+                hour12: false
             };
 
             const dateTime = now.toLocaleString('zh-TW', options);
@@ -71,25 +97,30 @@
 
         function toggleColor(element) {
             const id = element.id;
+            const selectedUser = document.getElementById("userSelect").value;
+
+            if (selectedUser === "空") {
+                alert("請選擇一個用戶");
+                return;
+            }
+
             if (element.classList.contains('green')) {
                 element.classList.remove('green');
                 element.classList.add('red');
-                element.textContent = `${id}-use`;
+                element.textContent = `${id} - ${selectedUser}`;
 
                 const colorRef = ref(db, id);
-                set(colorRef, { color: 'red' });
+                set(colorRef, { color: 'red', user: selectedUser });
 
-                getUserIP().then(ip => {
-                    const newRecord = {
-                        id: id,
-                        action: '使用中',
-                        user: ip,
-                        time: new Date().toISOString()
-                    };
+                // 
+                const newRecord = {
+                    id: id,
+                    action: '使用中',
+                    user: selectedUser,
+                    time: new Date().toISOString()
+                };
 
-                    // 使用 push 將紀錄寫入 Firebase
-                    push(recordsRef, newRecord);
-                });
+                push(recordsRef, newRecord);
             } else if (element.classList.contains('red')) {
                 element.classList.remove('red');
                 element.classList.add('green');
@@ -98,37 +129,24 @@
                 const colorRef = ref(db, id);
                 set(colorRef, { color: 'green' });
 
-                getUserIP().then(ip => {
-                    const newRecord = {
-                        id: id,
-                        action: '空閒',
-                        user: ip,
-                        time: new Date().toISOString()
-                    };
+                const newRecord = {
+                    id: id,
+                    action: '空閒',
+                    user: selectedUser,
+                    time: new Date().toISOString()
+                };
 
-                    // 使用 push 將紀錄寫入 Firebase
-                    push(recordsRef, newRecord);
-                });
+                push(recordsRef, newRecord);
             }
         }
 
-        function getUserIP() {
-            return fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => data.ip)
-                .catch(() => '無法取得IP');
-        }
-
         function showRecords() {
-            // 從 Firebase 獲取紀錄
             onValue(recordsRef, (snapshot) => {
                 const records = snapshot.val();
                 if (!records) return;
 
-                // 將紀錄轉換為陣列並顯示
                 const filteredRecords = Object.values(records).reverse();
 
-                // 建立並顯示模態對話框
                 const modal = document.createElement("div");
                 modal.classList.add("modal");
 
@@ -158,11 +176,7 @@
                     };
                     const localTime = recordTime.toLocaleString('zh-TW', options);
 
-                    if (record.user) {
-                        recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${localTime}`;
-                    } else {
-                        recordItem.textContent = `${record.id} - ${record.action} - ${localTime}`;
-                    }
+                    recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${localTime}`;
                     recordList.appendChild(recordItem);
                 });
 
@@ -213,7 +227,6 @@
             width: 12.5%;
             height: 50px;
         }
-
         h1 {
             font-family: 'DFKai-SB', "標楷體", serif;
             font-size: 32px;
@@ -224,13 +237,14 @@
             align-items: center;
             width: 100%;
         }
-
         #datetime {
             font-size: 18px;
             font-family: 'Arial', sans-serif;
             margin-left: 20px;
         }
-
+        select {
+            margin: 20px 0;
+        }
         .modal {
             position: fixed;
             top: 0;
@@ -243,7 +257,6 @@
             align-items: center;
             z-index: 1000;
         }
-
         .modal-content {
             background-color: white;
             padding: 20px;
@@ -253,7 +266,6 @@
             max-height: 80%;
             overflow-y: auto;
         }
-
         .close-btn {
             padding: 10px 20px;
             font-size: 16px;
@@ -264,16 +276,13 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
-
         .close-btn:hover {
             background-color: #d32f2f;
         }
-
         ul {
             list-style-type: none;
             padding-left: 0;
         }
-
         li {
             padding: 5px;
             border-bottom: 1px solid #ddd;
@@ -286,6 +295,14 @@
         iTEST瑞統停車管理
         <span id="datetime"></span>
     </h1>
+
+    <!--  -->
+    <div>
+        <label for="userSelect">選擇用戶: </label>
+        <select id="userSelect">
+            <option value="空">空</option>
+        </select>
+    </div>
 
     <h2>1F</h2>
     <table class="first-row">
