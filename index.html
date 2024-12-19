@@ -30,7 +30,7 @@
         ];
 
         window.onload = function() {
-            // 用戶選擇部分
+            // 
             const userSelect = document.getElementById("userSelect");
             users.forEach(user => {
                 const option = document.createElement("option");
@@ -48,15 +48,15 @@
                 localStorage.setItem("selectedUser", e.target.value);
             });
 
-            // 每秒刷新方塊狀態
+            // 
             setInterval(updateBlockStatus, 1000);
 
-            // 顯示時間
+            // 
             displayDateTime();
             setInterval(displayDateTime, 1000);
         };
 
-        // 顯示當前日期時間
+        // 
         function displayDateTime() {
             const now = new Date();
             const options = {
@@ -74,7 +74,7 @@
             document.getElementById('datetime').textContent = dateTime;
         }
 
-        // 更新所有方塊狀態
+        // 
         function updateBlockStatus() {
             const allCells = document.querySelectorAll('td');
             allCells.forEach(cell => {
@@ -99,7 +99,7 @@
             });
         }
 
-        // 切換方塊顏色
+        // 
         function toggleColor(element) {
             const id = element.id;
             const selectedUser = document.getElementById("userSelect").value;
@@ -144,7 +144,7 @@
             }
         }
 
-        // 顯示紀錄
+        // 
         function showRecords() {
             onValue(recordsRef, (snapshot) => {
                 const records = snapshot.val();
