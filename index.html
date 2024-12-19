@@ -22,7 +22,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const records = [];
+        const records = JSON.parse(localStorage.getItem("parkingRecords")) || [];
 
         window.onload = function() {
             const allCells = document.querySelectorAll('td');
@@ -35,7 +35,7 @@
                         cell.classList.remove('green', 'red');
                         cell.classList.add(data.color);
                         if (data.color === 'red') {
-                            cell.textContent = `${id}-${data.user}`;
+                            cell.textContent = `${id}-use`; // 顯示 "use"
                         } else {
                             cell.textContent = `${id}`;
                         }
@@ -65,41 +65,86 @@
         }
 
         function toggleColor(element) {
+            const id = element.id;
             if (element.classList.contains('green')) {
+                // 綠色轉紅色
                 element.classList.remove('green');
                 element.classList.add('red');
-                element.textContent = `${element.id}-使用中`; // 顯示使用中的狀態
-                const colorRef = ref(db, element.id);
+                element.textContent = `${id}-use`; // 顯示 "use"
+
+                const colorRef = ref(db, id);
                 set(colorRef, { color: 'red' });
+
+                // 紀錄 IP 地址
+                getUserIP().then(ip => {
+                    const record = {
+                        id: id,
+                        action: '使用中',
+                        user: ip,
+                        time: new Date().toISOString()
+                    };
+                    records.push(record);
+
+                    // 儲存到 localStorage 中
+                    localStorage.setItem("parkingRecords", JSON.stringify(records));
+                });
             } else if (element.classList.contains('red')) {
+                // 紅色轉綠色
                 element.classList.remove('red');
                 element.classList.add('green');
-                element.textContent = `${element.id}`; // 恢復為空閒狀態
-                const colorRef = ref(db, element.id);
+                element.textContent = `${id}`; // 還原為原本顯示的編號
+
+                const colorRef = ref(db, id);
                 set(colorRef, { color: 'green' });
+
+                // 紀錄 IP 地址
+                getUserIP().then(ip => {
+                    const record = {
+                        id: id,
+                        action: '空閒',
+                        user: ip,
+                        time: new Date().toISOString()
+                    };
+                    records.push(record);
+
+                    // 儲存到 localStorage 中
+                    localStorage.setItem("parkingRecords", JSON.stringify(records));
+                });
             }
         }
 
+        function getUserIP() {
+            return fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => data.ip)
+                .catch(() => '無法取得IP');  // 如果無法獲取IP，返回 '無法取得IP'
+        }
+
         function showRecords() {
+            // 過濾過去三天內的紀錄
             const filteredRecords = records.filter(record => {
                 const recordTime = new Date(record.time);
                 const currentTime = new Date();
-                const timeDiff = (currentTime - recordTime) / (1000 * 3600 * 24);
+                const timeDiff = (currentTime - recordTime) / (1000 * 3600 * 24); // 轉換為天數
                 return timeDiff <= 3;
             });
 
-            const recordContainer = document.createElement("div");
-            recordContainer.style.position = "fixed";
-            recordContainer.style.top = "0";
-            recordContainer.style.left = "0";
-            recordContainer.style.width = "100%";
-            recordContainer.style.height = "100%";
-            recordContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-            recordContainer.style.display = "flex";
-            recordContainer.style.justifyContent = "center";
-            recordContainer.style.alignItems = "center";
-            recordContainer.style.zIndex = "1000";
-            document.body.appendChild(recordContainer);
+            // 將紀錄倒序顯示，最新的紀錄在最上面
+            filteredRecords.reverse();
+
+            // 顯示紀錄的對話框
+            const modal = document.createElement("div");
+            modal.classList.add("modal");
+
+            const modalContent = document.createElement("div");
+            modalContent.classList.add("modal-content");
+
+            const closeButton = document.createElement("button");
+            closeButton.textContent = "關閉";
+            closeButton.classList.add("close-btn");
+            closeButton.onclick = function() {
+                document.body.removeChild(modal);
+            };
 
             const recordList = document.createElement("ul");
             filteredRecords.forEach(record => {
@@ -111,14 +156,11 @@
                 }
                 recordList.appendChild(recordItem);
             });
-            recordContainer.appendChild(recordList);
 
-            const closeButton = document.createElement("button");
-            closeButton.textContent = "關閉";
-            closeButton.onclick = function() {
-                document.body.removeChild(recordContainer);
-            };
-            recordContainer.appendChild(closeButton);
+            modalContent.appendChild(closeButton);
+            modalContent.appendChild(recordList);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
         }
 
         window.toggleColor = toggleColor;
@@ -178,6 +220,55 @@
             font-family: 'Arial', sans-serif;
             margin-left: 20px;
         }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .close-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -219,7 +310,7 @@
         </tr>
     </table>
 
-    <button onclick="showRecords()">顯示紀錄(開發中)</button>
-
+    <button onclick="showRecords()">顯示紀錄</button>
+    
 </body>
 </html>
