@@ -6,7 +6,7 @@
     <title>瑞統停車:小劉製</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
@@ -26,11 +26,10 @@
         const users = [
             "蘇總", "蔡祐宸", "葉偉仁", "周鶴娟", "丁木輝", "劉力綸", 
             "沈虹君", "董鴻耀", "張雅玲", "張世華", "吳振銘", "鄭怡惠", "許民榆", 
-            "劉邦緯", "李家駿","劉俊彥"
+            "劉邦緯", "李家駿", "劉俊彥"
         ];
 
         window.onload = function() {
-            // 
             const userSelect = document.getElementById("userSelect");
             users.forEach(user => {
                 const option = document.createElement("option");
@@ -48,15 +47,11 @@
                 localStorage.setItem("selectedUser", e.target.value);
             });
 
-            // 
             setInterval(updateBlockStatus, 1000);
-
-            // 
             displayDateTime();
             setInterval(displayDateTime, 1000);
         };
 
-        // 
         function displayDateTime() {
             const now = new Date();
             const options = {
@@ -74,7 +69,6 @@
             document.getElementById('datetime').textContent = dateTime;
         }
 
-        // 
         function updateBlockStatus() {
             const allCells = document.querySelectorAll('td');
             allCells.forEach(cell => {
@@ -99,7 +93,6 @@
             });
         }
 
-        // 
         function toggleColor(element) {
             const id = element.id;
             const selectedUser = document.getElementById("userSelect").value;
@@ -144,57 +137,137 @@
             }
         }
 
-        // 
         function showRecords() {
-            onValue(recordsRef, (snapshot) => {
-                const records = snapshot.val();
-                if (!records) return;
+            const modal = document.createElement("div");
+            modal.classList.add("modal");
 
-                const filteredRecords = Object.values(records).reverse();
+            const modalContent = document.createElement("div");
+            modalContent.classList.add("modal-content");
 
-                const modal = document.createElement("div");
-                modal.classList.add("modal");
+            const closeButton = document.createElement("button");
+            closeButton.textContent = "關閉";
+            closeButton.classList.add("close-btn");
+            closeButton.onclick = function() {
+                document.body.removeChild(modal);
+            };
 
-                const modalContent = document.createElement("div");
-                modalContent.classList.add("modal-content");
+            const filterDiv = document.createElement("div");
+            const filterLabel = document.createElement("label");
+            filterLabel.textContent = "篩選條件：";
+            filterDiv.appendChild(filterLabel);
 
-                const closeButton = document.createElement("button");
-                closeButton.textContent = "關閉";
-                closeButton.classList.add("close-btn");
-                closeButton.onclick = function() {
-                    document.body.removeChild(modal);
-                };
+            const carNumberInput = document.createElement("input");
+            carNumberInput.placeholder = "車號";
+            filterDiv.appendChild(carNumberInput);
 
-                const recordList = document.createElement("ul");
-                filteredRecords.forEach(record => {
-                    const recordItem = document.createElement("li");
-                    const recordTime = new Date(record.time);
-                    const options = {
-                        timeZone: 'Asia/Taipei',
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        hour12: false
-                    };
-                    const localTime = recordTime.toLocaleString('zh-TW', options);
-
-                    recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${localTime}`;
-                    recordList.appendChild(recordItem);
-                });
-
-                modalContent.appendChild(closeButton);
-                modalContent.appendChild(recordList);
-                modal.appendChild(modalContent);
-                document.body.appendChild(modal);
+            const userSelect = document.createElement("select");
+            users.forEach(user => {
+                const option = document.createElement("option");
+                option.value = user;
+                option.textContent = user;
+                userSelect.appendChild(option);
             });
+
+            const allOption = document.createElement("option");
+            allOption.value = "全部";
+            allOption.textContent = "全部";
+            userSelect.appendChild(allOption);
+
+            filterDiv.appendChild(userSelect);
+
+            const dateInput = document.createElement("input");
+            dateInput.type = "date";
+            filterDiv.appendChild(dateInput);
+
+            modalContent.appendChild(filterDiv);
+
+            const recordList = document.createElement("ul");
+            modalContent.appendChild(recordList);
+
+            const filterButton = document.createElement("button");
+            filterButton.textContent = "篩選";
+            filterButton.onclick = function() {
+                const carNumber = carNumberInput.value.trim().toLowerCase();
+                const selectedUser = userSelect.value;
+                const selectedDate = dateInput.value;
+
+                onValue(recordsRef, (snapshot) => {
+                    const records = snapshot.val();
+                    if (!records) return;
+
+                    const filteredRecords = Object.entries(records)
+                        .filter(([key, record]) => {
+                            const recordDate = new Date(record.time);
+                            const recordDateStr = recordDate.toISOString().split('T')[0];
+
+                            const isCarNumberMatch = carNumber === "" || record.id.toLowerCase().includes(carNumber);
+                            const isUserMatch = selectedUser === "全部" || record.user === selectedUser;
+                            const isDateMatch = !selectedDate || recordDateStr === selectedDate;
+
+                            return isCarNumberMatch && isUserMatch && isDateMatch;
+                        })
+                        .reverse();
+
+                    recordList.innerHTML = ''; 
+
+                    filteredRecords.forEach(([key, record]) => {
+                        const recordItem = document.createElement("li");
+                        const recordTime = new Date(record.time);
+                        const options = {
+                            timeZone: 'Asia/Taipei',
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                        };
+                        const localTime = recordTime.toLocaleString('zh-TW', options);
+
+                        recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${localTime}`;
+
+                        const deleteButton = document.createElement("button");
+                        deleteButton.textContent = "刪除";
+                        deleteButton.onclick = function() {
+                            const password = prompt("請輸入密碼以刪除紀錄:");
+                            if (password === "effimax") {
+                                remove(ref(db, 'records/' + key)).then(() => {
+                                    alert("紀錄已刪除！");
+                                    showRecords();  
+                                }).catch((error) => {
+                                    alert("刪除失敗：" + error);
+                                });
+                            } else {
+                                alert("密碼錯誤！");
+                            }
+                        };
+                        recordItem.appendChild(deleteButton);
+
+                        recordList.appendChild(recordItem);
+                    });
+                });
+            };
+
+            modalContent.appendChild(filterButton);
+
+            // 
+            const backToMainButton = document.createElement("button");
+            backToMainButton.textContent = "回到主畫面";
+            backToMainButton.onclick = function() {
+                document.body.removeChild(modal);
+            };
+
+            modalContent.appendChild(backToMainButton);
+
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
         }
 
         window.toggleColor = toggleColor;
         window.showRecords = showRecords;
     </script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -237,10 +310,6 @@
             font-size: 32px;
             margin-bottom: 20px;
             text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
         }
         #datetime {
             font-size: 18px;
@@ -292,12 +361,16 @@
             padding: 5px;
             border-bottom: 1px solid #ddd;
         }
+        button {
+            cursor: pointer;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
     <h1>
-        iTEST瑞統停車管理
+        瑞統停車管理系統
         <span id="datetime"></span>
     </h1>
 
@@ -339,7 +412,7 @@
         </tr>
     </table>
 
-    <button onclick="showRecords()">顯示紀錄(刪除請找小劉)</button>
+    <button onclick="showRecords()">顯示紀錄</button>
 
 </body>
 </html>
