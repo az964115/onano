@@ -123,7 +123,41 @@ function applyUserWithTime() {
     localStorage.setItem("selectedUser", name);
     input.value = "";
 }
+    let finalSelectedUser = ""; // 存儲目前選擇的使用者資訊
+let finalEndTime = null;    // 存儲結束時間
 
+function applyCustomUserAndTime() {
+    const dropdownUser = document.getElementById("userSelect").value;
+    const customName = document.getElementById("customUserInput").value.trim();
+    const customTime = document.getElementById("customTimeInput").value.trim();
+
+    const user = customName || dropdownUser;
+
+    if (!user) {
+        alert("請選擇或輸入使用者名稱");
+        return;
+    }
+
+    if (!customTime) {
+        alert("請輸入使用時間，例如：09:00~11:00");
+        return;
+    }
+
+    const match = customTime.match(/^(\d{2}):(\d{2})~(\d{2}):(\d{2})$/);
+    if (!match) {
+        alert("時間格式錯誤，請使用 09:00~11:00 格式");
+        return;
+    }
+
+    // 解析時間
+    const [, sh, sm, eh, em] = match;
+    const now = new Date();
+    finalEndTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(eh), parseInt(em));
+    finalSelectedUser = `${user} - ${customTime}`;
+    localStorage.setItem("selectedUser", finalSelectedUser);
+
+    alert(`已套用使用者與時間：${finalSelectedUser}`);
+}
         window.onload = function() {
             const userSelect = document.getElementById("userSelect");
             users.forEach(user => {
@@ -201,17 +235,16 @@ function applyUserWithTime() {
 
         function toggleColor(element) {
     const id = element.id;
-    const selectedUser = customUserWithTime || document.getElementById("userSelect").value;
 
+    const selectedUser = finalSelectedUser || document.getElementById("userSelect").value;
     if (!selectedUser) {
-        alert("請選擇或輸入使用者名稱與時間！");
+        alert("請先選擇或輸入使用者名稱與時間");
         return;
     }
 
     const colorRef = ref(db, id);
 
     if (element.classList.contains('green')) {
-        // 切換為紅色
         element.classList.remove('green');
         element.classList.add('red');
         element.textContent = `${id} - ${selectedUser}`;
@@ -221,19 +254,18 @@ function applyUserWithTime() {
             action: '使用中',
             user: selectedUser,
             time: new Date().toISOString(),
-            endTime: customEndTime ? customEndTime.toISOString() : null
+            endTime: finalEndTime ? finalEndTime.toISOString() : null
         };
 
         set(colorRef, {
             color: 'red',
             user: selectedUser,
-            endTime: customEndTime ? customEndTime.toISOString() : null
+            endTime: finalEndTime ? finalEndTime.toISOString() : null
         });
 
         push(recordsRef, newRecord);
 
     } else if (element.classList.contains('red')) {
-        // 切回綠色
         element.classList.remove('red');
         element.classList.add('green');
         element.textContent = id;
@@ -248,8 +280,6 @@ function applyUserWithTime() {
         });
     }
 }
-
-
                 push(recordsRef, newRecord);
             } else if (element.classList.contains('red')) {
                 element.classList.remove('red');
@@ -459,19 +489,18 @@ function applyUserWithTime() {
         <img id="systemImage" src="https://i.meee.com.tw/VFCitmP.png" alt="悅城會議室預約系統圖片" />
     </a>
 
-    <div>
-        <label for="userSelect">選擇用戶: </label>
-        <select id="userSelect">
-            <option value="">請選擇</option>
-        </select>
-        <input type="text" id="customUserInput" placeholder="輸入新用戶名稱" />
-        <button onclick="addCustomUser()">加入</button>
-    </div>
-    <div style="margin-top: 10px;">
-    <input type="text" id="customUserInput" placeholder="輸入使用者名稱" />
-    <input type="text" id="customTimeInput" placeholder="例如：09:00~11:00" />
-    <button onclick="applyUserWithTime()">套用使用者與時間</button>
+   <!-- 選擇用戶 + 自訂名稱與時間輸入 -->
+<div>
+    <label for="userSelect">選擇用戶: </label>
+    <select id="userSelect">
+        <option value="">請選擇</option>
+    </select>
+
+    <input type="text" id="customUserInput" placeholder="或輸入名稱，例如：王大明" />
+    <input type="text" id="customTimeInput" placeholder="時間，例如：09:00~11:00" />
+    <button onclick="applyCustomUserAndTime()">套用</button>
 </div>
+
 
 
     <div>
@@ -526,6 +555,7 @@ function applyUserWithTime() {
 
 </body>
 </html>
+
 
 
 
