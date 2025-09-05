@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>瑞統停車:小劉製</title>
+    <title>悅城會議室預約系統:小劉製
+    </title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
@@ -24,9 +25,7 @@
         const recordsRef = ref(db, 'records');
 
         const users = [
-            "蘇總", "蔡祐宸", "葉偉仁", "周鶴娟", "丁木輝", "劉力綸", 
-            "沈虹君", "董鴻耀", "張雅玲", "張世華", "鄭怡惠", 
-            "李家駿", "其他", "管理者"  // 
+            "吳德宏", "王清鴻", "留瑞蓮", "李家維", "李滋芳", "劉俊彥",  "廠商", "其他", "管理者"  // 
         ];
 
         window.onload = function() {
@@ -47,7 +46,7 @@
                 const selectedUser = e.target.value;
                 if (selectedUser === "管理者") {
                     const password = prompt("請輸入密碼以選擇管理者:");
-                    if (password === "effimax") {
+                    if (password === "Onano_Nb") {
                         localStorage.setItem("selectedUser", selectedUser);
                     } else {
                         alert("密碼錯誤！");
@@ -326,7 +325,7 @@
 <body>
 
     <h1>
-        瑞統停車系統
+        悅城會議室預約系統
     </h1>
 
     <h1>
@@ -334,7 +333,7 @@
     </h1>
 
     <a href="http://www.rato.tw/">
-        <img id="systemImage" src="https://imgur.com/JszP9Tj.jpg" alt="瑞統停車管理系統圖片" />
+        <img id="systemImage" src="https://i.meee.com.tw/VFCitmP.png" alt="悅城會議室預約系統圖片" />
     </a>
 
     <div>
@@ -349,40 +348,39 @@
         <span>最新消息: 請同仁踴躍使用!!</span>
     </div>
 
-    <h2>1F</h2>
+    <h2>小型會議室</h2>
     <table class="first-row">
         <tr>
-            <td class="green" id="12" onclick="toggleColor(this)">12</td>
-            <td class="green" id="13" onclick="toggleColor(this)">13</td>
-            <td class="green" id="14" onclick="toggleColor(this)">14</td>
-            <td class="green" id="15" onclick="toggleColor(this)">15</td>
-            <td class="green" id="16" onclick="toggleColor(this)">16</td>
+            <td class="green" id="101" onclick="toggleColor(this)">101</td>
+            <td class="green" id="102" onclick="toggleColor(this)">102</td>
+            <td class="green" id="103" onclick="toggleColor(this)">103</td>
+            <td class="green" id="104" onclick="toggleColor(this)">104</td>
+            <td class="green" id="105" onclick="toggleColor(this)">105</td>
         </tr>
     </table>
 
-    <h2>B2</h2>
+    <h2>大型會議室
+    </h2>
     <table class="second-row">
         <tr>
-            <td class="green" id="A09" onclick="toggleColor(this)">A09</td>
-            <td class="green" id="A10" onclick="toggleColor(this)">A10</td>
-            <td class="green" id="A24" onclick="toggleColor(this)">A24</td>
-            <td class="green" id="A25" onclick="toggleColor(this)">A25</td>
-            <td class="green" id="A26" onclick="toggleColor(this)">A26</td>
+            <td class="green" id="106" onclick="toggleColor(this)">106</td>
+            <td class="green" id="107" onclick="toggleColor(this)">107</td>
+            <td class="green" id="108" onclick="toggleColor(this)">108</td>
         </tr>
     </table>
 
-    <h2>B2</h2>
+    <h2>其他型</h2>
     <table class="second-row">
         <tr>
-            <td class="green" id="C02" onclick="toggleColor(this)">C02</td>
-            <td class="green" id="C04" onclick="toggleColor(this)">C04</td>
-            <td class="green" id="C21" onclick="toggleColor(this)">C21</td>
+            <td class="green" id="A01" onclick="toggleColor(this)">A01</td>
+            <td class="green" id="A02" onclick="toggleColor(this)">A02</td>
+            <td class="green" id="A03" onclick="toggleColor(this)">A03</td>
         </tr>
     </table>
 
     <div>
-        <label for="carNumberInput">搜尋車位ID:</label>
-        <input type="text" id="carNumberInput" placeholder="輸入車位ID...">
+        <label for="carNumberInput">搜尋預約::</label>
+        <input type="text" id="carNumberInput" placeholder="輸入會議室ID...">
     </div>
 
     <button onclick="showRecords()">顯示紀錄</button>
@@ -391,3 +389,4 @@
 
 </body>
 </html>
+
