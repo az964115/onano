@@ -28,6 +28,70 @@
             "吳德宏", "王清鴻", "留瑞蓮", "李家維", "李滋芳", "劉俊彥",  "廠商", "其他", "管理者"  // 
         ];
 
+        function addCustomUser() {
+    const input = document.getElementById("customUserInput");
+    const userSelect = document.getElementById("userSelect");
+    const name = input.value.trim();
+    if (!name) {
+        alert("請輸入名稱");
+        return;
+    }
+
+            function applyCustomTime() {
+    const timeInput = document.getElementById("customTimeInput").value.trim();
+    const userSelect = document.getElementById("userSelect");
+    let selectedUser = userSelect.value;
+
+    if (!selectedUser) {
+        alert("請先選擇使用者！");
+        return;
+    }
+
+    if (!timeInput) {
+        alert("請輸入使用時間！");
+        return;
+    }
+
+    // 移除舊的時間部分（如果有）
+    const nameOnly = selectedUser.split('(')[0].trim();
+
+    const newName = `${nameOnly} (${timeInput})`;
+
+    // 替換下拉選項
+    const options = userSelect.options;
+    for (let i = 0; i < options.length; i++) {
+        if (options[i].value === selectedUser) {
+            options[i].value = newName;
+            options[i].textContent = newName;
+            userSelect.value = newName;
+            localStorage.setItem("selectedUser", newName);
+            break;
+        }
+    }
+
+    document.getElementById("customTimeInput").value = "";
+}
+
+    // 檢查是否已存在
+    for (let i = 0; i < userSelect.options.length; i++) {
+        if (userSelect.options[i].value === name) {
+            userSelect.value = name;
+            localStorage.setItem("selectedUser", name);
+            input.value = "";
+            return;
+        }
+    }
+
+    // 加入新項目
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    userSelect.appendChild(option);
+    userSelect.value = name;
+    localStorage.setItem("selectedUser", name);
+    input.value = "";
+}
+
         window.onload = function() {
             const userSelect = document.getElementById("userSelect");
             users.forEach(user => {
@@ -310,7 +374,7 @@
         #newsTicker span {
             display: inline-block;
             padding-right: 100%;
-            animation: ticker 10s linear infinite;
+            animation: ticker 30s linear infinite;
         }
         @keyframes ticker {
             0% {
@@ -341,7 +405,16 @@
         <select id="userSelect">
             <option value="">請選擇</option>
         </select>
+        <input type="text" id="customUserInput" placeholder="輸入新用戶名稱" />
+        <button onclick="addCustomUser()">加入</button>
     </div>
+
+    <div>
+    <label for="customTimeInput">自訂使用時間：</label>
+    <input type="text" id="customTimeInput" placeholder="例如：09:00~11:00" />
+    <button onclick="applyCustomTime()">加入時間</button>
+    </div>
+
 
     <!--  -->
     <div id="newsTicker">
@@ -388,4 +461,5 @@
 
 </body>
 </html>
+
 
