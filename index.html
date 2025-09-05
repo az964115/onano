@@ -156,7 +156,7 @@ function applyCustomUserAndTime() {
     finalSelectedUser = `${user} - ${customTime}`;
     localStorage.setItem("selectedUser", finalSelectedUser);
 
-    alert(`已套用使用者與時間：${finalSelectedUser}`);
+    alert(`✅ 套用成功：${finalSelectedUser}`);
 }
         window.onload = function() {
             const userSelect = document.getElementById("userSelect");
@@ -280,25 +280,6 @@ function applyCustomUserAndTime() {
         });
     }
 }
-                push(recordsRef, newRecord);
-            } else if (element.classList.contains('red')) {
-                element.classList.remove('red');
-                element.classList.add('green');
-                element.textContent = `${id}`;
-
-                const colorRef = ref(db, id);
-                set(colorRef, { color: 'green' });
-
-                const newRecord = {
-                    id: id,
-                    action: '空閒',
-                    user: selectedUser,
-                    time: new Date().toISOString()
-                };
-
-                push(recordsRef, newRecord);
-            }
-        }
 
         function showRecords() {
             const recordList = document.getElementById("recordList");
@@ -500,16 +481,6 @@ function applyCustomUserAndTime() {
     <input type="text" id="customTimeInput" placeholder="時間，例如：09:00~11:00" />
     <button onclick="applyCustomUserAndTime()">套用</button>
 </div>
-
-
-
-    <div>
-    <label for="customTimeInput">自訂使用時間：</label>
-    <input type="text" id="customTimeInput" placeholder="例如：09:00~11:00" />
-    <button onclick="applyCustomTime()">加入時間</button>
-    </div>
-
-
     <!--  -->
     <div id="newsTicker">
         <span>最新消息: 請同仁踴躍使用!!</span>
@@ -555,6 +526,7 @@ function applyCustomUserAndTime() {
 
 </body>
 </html>
+
 
 
 
