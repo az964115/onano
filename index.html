@@ -8,6 +8,38 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        let customUserWithTime = ""; // 全域變數儲存輸入的結果
+let customEndTime = null;
+
+function applyUserWithTime() {
+    const userInput = document.getElementById("customUserInput").value.trim();
+    const timeInput = document.getElementById("customTimeInput").value.trim();
+
+    if (!userInput || !timeInput) {
+        alert("請輸入使用者名稱和時間！");
+        return;
+    }
+
+    const timePattern = /^(\d{2}:\d{2})~(\d{2}:\d{2})$/;
+    const match = timeInput.match(timePattern);
+
+    if (!match) {
+        alert("時間格式錯誤，請使用 09:00~11:00 格式");
+        return;
+    }
+
+    const today = new Date();
+    const endTimeStr = match[2]; // 取結束時間部分
+    const [endHour, endMinute] = endTimeStr.split(":");
+    const endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, endMinute);
+
+    customUserWithTime = `${userInput} - ${timeInput}`;
+    customEndTime = endTime;
+
+    localStorage.setItem("selectedUser", customUserWithTime);
+
+    alert(`已套用：${customUserWithTime}`);
+}
 
         const firebaseConfig = {
             apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
@@ -168,28 +200,55 @@
         }
 
         function toggleColor(element) {
-            const id = element.id;
-            const selectedUser = document.getElementById("userSelect").value;
+    const id = element.id;
+    const selectedUser = customUserWithTime || document.getElementById("userSelect").value;
 
-            if (!selectedUser) {
-                alert("請選擇一個用戶");
-                return;
-            }
+    if (!selectedUser) {
+        alert("請選擇或輸入使用者名稱與時間！");
+        return;
+    }
 
-            if (element.classList.contains('green')) {
-                element.classList.remove('green');
-                element.classList.add('red');
-                element.textContent = `${id} - ${selectedUser}`;
+    const colorRef = ref(db, id);
 
-                const colorRef = ref(db, id);
-                set(colorRef, { color: 'red', user: selectedUser });
+    if (element.classList.contains('green')) {
+        // 切換為紅色
+        element.classList.remove('green');
+        element.classList.add('red');
+        element.textContent = `${id} - ${selectedUser}`;
 
-                const newRecord = {
-                    id: id,
-                    action: '使用中',
-                    user: selectedUser,
-                    time: new Date().toISOString()
-                };
+        const newRecord = {
+            id: id,
+            action: '使用中',
+            user: selectedUser,
+            time: new Date().toISOString(),
+            endTime: customEndTime ? customEndTime.toISOString() : null
+        };
+
+        set(colorRef, {
+            color: 'red',
+            user: selectedUser,
+            endTime: customEndTime ? customEndTime.toISOString() : null
+        });
+
+        push(recordsRef, newRecord);
+
+    } else if (element.classList.contains('red')) {
+        // 切回綠色
+        element.classList.remove('red');
+        element.classList.add('green');
+        element.textContent = id;
+
+        set(colorRef, { color: 'green' });
+
+        push(recordsRef, {
+            id: id,
+            action: '空閒',
+            user: selectedUser,
+            time: new Date().toISOString()
+        });
+    }
+}
+
 
                 push(recordsRef, newRecord);
             } else if (element.classList.contains('red')) {
@@ -408,6 +467,12 @@
         <input type="text" id="customUserInput" placeholder="輸入新用戶名稱" />
         <button onclick="addCustomUser()">加入</button>
     </div>
+    <div style="margin-top: 10px;">
+    <input type="text" id="customUserInput" placeholder="輸入使用者名稱" />
+    <input type="text" id="customTimeInput" placeholder="例如：09:00~11:00" />
+    <button onclick="applyUserWithTime()">套用使用者與時間</button>
+</div>
+
 
     <div>
     <label for="customTimeInput">自訂使用時間：</label>
@@ -461,5 +526,6 @@
 
 </body>
 </html>
+
 
 
