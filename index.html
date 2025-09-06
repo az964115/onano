@@ -29,7 +29,7 @@ function applyUserWithTime() {
     }
 
     const today = new Date();
-    const endTimeStr = match[2]; // 取結束時間部分
+    const endTimeStr = match[2]; 
     const [endHour, endMinute] = endTimeStr.split(":");
     const endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, endMinute);
 
@@ -85,12 +85,10 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
         return;
     }
 
-    // 移除舊的時間部分（如果有）
     const nameOnly = selectedUser.split('(')[0].trim();
 
     const newName = `${nameOnly} (${timeInput})`;
 
-    // 替換下拉選項
     const options = userSelect.options;
     for (let i = 0; i < options.length; i++) {
         if (options[i].value === selectedUser) {
@@ -104,8 +102,6 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
     document.getElementById("customTimeInput").value = "";
 }
-
-    // 檢查是否已存在
     for (let i = 0; i < userSelect.options.length; i++) {
         if (userSelect.options[i].value === name) {
             userSelect.value = name;
@@ -114,8 +110,6 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
             return;
         }
     }
-
-    // 加入新項目
     const option = document.createElement("option");
     option.value = name;
     option.textContent = name;
@@ -124,8 +118,8 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
     localStorage.setItem("selectedUser", name);
     input.value = "";
 }
-    let finalSelectedUser = ""; // 存儲目前選擇的使用者資訊
-let finalEndTime = null;    // 存儲結束時間
+    let finalSelectedUser = ""; 
+let finalEndTime = null;   
 
 function applyCustomUserAndTime() {
     const dropdownUser = document.getElementById("userSelect").value.trim();
@@ -151,18 +145,15 @@ function applyCustomUserAndTime() {
 
     const [_, datePart, startTime, endTime] = match;
 
-    // 組合名稱
     const user = customName || dropdownUser;
     const fullTimeString = datePart ? `${datePart} ${startTime}~${endTime}` : `${startTime}~${endTime}`;
     const finalUserInfo = `${user} - ${fullTimeString}`;
 
-    // 計算結束時間，儲存用
     const today = new Date();
     const endHour = parseInt(endTime.split(":")[0], 10);
     const endMinute = parseInt(endTime.split(":")[1], 10);
     finalEndTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, endMinute);
 
-    // 儲存
     finalSelectedUser = finalUserInfo;
     localStorage.setItem("selectedUser", finalUserInfo);
 
@@ -479,7 +470,6 @@ function applyCustomUserAndTime() {
     <a href="http://www.onano-nm.com/">
         <img id="systemImage" src="https://i.meee.com.tw/VFCitmP.png" alt="悅城會議室預約系統圖片" />
     </a>
-<!-- 使用者選擇/輸入 + 時間 + 套用 -->
 <div>
     <label for="userSelect">選擇用戶: </label>
     <select id="userSelect">
@@ -491,7 +481,6 @@ function applyCustomUserAndTime() {
     <button onclick="applyCustomUserAndTime()">套用</button>
 </div>
 
-    <!--  -->
     <div id="newsTicker">
         <span>最新消息: 請同仁踴躍使用!!</span>
     </div>
@@ -536,6 +525,7 @@ function applyCustomUserAndTime() {
 
 </body>
 </html>
+
 
 
 
