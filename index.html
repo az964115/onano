@@ -79,6 +79,7 @@ function reserveForFuture() {
         if (!data) return;
 
         const now = Date.now();
+        const currentUser = document.getElementById("userSelect").value;
 
         const sorted = Object.entries(data).sort((a, b) => {
             return new Date(a[1].startTime) - new Date(b[1].startTime);
@@ -99,10 +100,36 @@ function reserveForFuture() {
 
             li.textContent = `${res.roomId} - ${res.user}（${localTime}）`;
 
+            // ✅ 只有管理者能看到刪除按鈕
+            if (currentUser === "管理者") {
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "刪除";
+                deleteBtn.style.marginLeft = "10px";
+
+                deleteBtn.onclick = function () {
+                    const password = prompt("請輸入密碼以刪除預約：");
+                    if (password === "Onano_Nb") {
+                        remove(ref(db, `futureReservations/${key}`))
+                            .then(() => {
+                                alert("✅ 預約已刪除");
+                                loadFutureReservations(); // 重新載入
+                            })
+                            .catch(err => {
+                                alert("❌ 刪除失敗：" + err);
+                            });
+                    } else {
+                        alert("密碼錯誤！");
+                    }
+                };
+
+                li.appendChild(deleteBtn);
+            }
+
             listElem.appendChild(li);
         });
     });
 }
+
 function monitorFutureReservations() {
     setInterval(() => {
         const now = new Date();
@@ -574,7 +601,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
     </a>
 <div>
     <div>
-    <h2>📅 未來預約時程</h2>
+    <h2>📅 預約會議室</h2>
     <ul id="futureReservationsList"></ul>
 </div>
     <label for="userSelect">選擇用戶: </label>
@@ -646,3 +673,4 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
