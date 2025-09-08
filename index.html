@@ -291,9 +291,10 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                     const password = prompt("請輸入密碼以選擇管理者:");
                     if (password === "Onano_Nb") {
                         localStorage.setItem("selectedUser", selectedUser);
+                        e.target.value = "管理者";  // ✅ 強制保留選項
                     } else {
                         alert("密碼錯誤！");
-                        e.target.value = ""; 
+                        e.target.value = "";
                     }
                 } else {
                     localStorage.setItem("selectedUser", selectedUser);
@@ -673,4 +674,5 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
