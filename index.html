@@ -31,42 +31,81 @@
     let finalSelectedUser = ""; 
 let finalEndTime = null;   
 
+function populateTimeSelectors() {
+    const dateSelect = document.getElementById("dateSelect");
+    const startHour = document.getElementById("startHour");
+    const startMinute = document.getElementById("startMinute");
+    const endHour = document.getElementById("endHour");
+    const endMinute = document.getElementById("endMinute");
+
+    // 1. 日期選單：今天、明天、後天
+    const today = new Date();
+    for (let i = 0; i < 3; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const mmdd = `${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+        const option = document.createElement("option");
+        option.value = mmdd;
+        option.textContent = `${mmdd}（${["今天", "明天", "後天"][i]}）`;
+        dateSelect.appendChild(option);
+    }
+
+    // 2. 時：00~23
+    for (let h = 0; h < 24; h++) {
+        const hStr = h.toString().padStart(2, '0');
+        [startHour, endHour].forEach(select => {
+            const opt = document.createElement("option");
+            opt.value = hStr;
+            opt.textContent = hStr;
+            select.appendChild(opt);
+        });
+    }
+
+    // 3. 分：00, 15, 30, 45
+    [0, 15, 30, 45].forEach(m => {
+        const mStr = m.toString().padStart(2, '0');
+        [startMinute, endMinute].forEach(select => {
+            const opt = document.createElement("option");
+            opt.value = mStr;
+            opt.textContent = mStr;
+            select.appendChild(opt);
+        });
+    });
+}
+        
 function applyCustomUserAndTime() {
     const dropdownUser = document.getElementById("userSelect").value.trim();
     const customName = document.getElementById("customUserInput").value.trim();
-    const timeInput = document.getElementById("customTimeInput").value.trim();
+
+    const datePart = document.getElementById("dateSelect").value;
+    const startHour = document.getElementById("startHour").value;
+    const startMinute = document.getElementById("startMinute").value;
+    const endHour = document.getElementById("endHour").value;
+    const endMinute = document.getElementById("endMinute").value;
 
     if (!dropdownUser && !customName) {
         alert("請選擇或輸入使用者名稱");
         return;
     }
 
-    if (!timeInput) {
-        alert("請輸入使用時間，例如：0921 09:00~11:00 或 09:00~11:00");
+    if (!datePart || !startHour || !startMinute || !endHour || !endMinute) {
+        alert("請完整選擇時間（日期、開始時間、結束時間）");
         return;
     }
-
-    const dateTimePattern = /^(\d{4})?\s?(\d{2}:\d{2})~(\d{2}:\d{2})$/;
-    const match = timeInput.match(dateTimePattern);
-    if (!match) {
-        alert("時間格式錯誤，請使用 0921 09:00~11:00 或 09:00~11:00 格式");
-        return;
-    }
-
-    const [_, datePart, startTime, endTime] = match;
 
     const user = customName || dropdownUser;
-    const fullTimeString = datePart ? `${datePart} ${startTime}~${endTime}` : `${startTime}~${endTime}`;
+    const fullTimeString = `${datePart} ${startHour}:${startMinute}~${endHour}:${endMinute}`;
     const finalUserInfo = `${user} - ${fullTimeString}`;
 
     const today = new Date();
-    const endHour = parseInt(endTime.split(":")[0], 10);
-    const endMinute = parseInt(endTime.split(":")[1], 10);
-    finalEndTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, endMinute);
+    const year = today.getFullYear();
+    const month = parseInt(datePart.slice(0, 2), 10) - 1; // 月份從 0 開始
+    const day = parseInt(datePart.slice(2), 10);
 
+    finalEndTime = new Date(year, month, day, parseInt(endHour), parseInt(endMinute));
     finalSelectedUser = finalUserInfo;
-    localStorage.setItem("selectedUser", finalUserInfo);
 
+    localStorage.setItem("selectedUser", finalUserInfo);
     alert(`✅ 已套用：${finalUserInfo}`);
 }
         window.onload = function() {
@@ -76,6 +115,7 @@ function applyCustomUserAndTime() {
                 option.value = user;
                 option.textContent = user;
                 userSelect.appendChild(option);
+                populateTimeSelectors(); // 呼叫時間選單初始化
             });
 
             const savedUser = localStorage.getItem("selectedUser");
@@ -144,6 +184,7 @@ function applyCustomUserAndTime() {
             });
         }
 
+        populateTimeSelectors();
         function toggleColor(element) {
             const id = element.id;
 
@@ -387,7 +428,16 @@ function applyCustomUserAndTime() {
     </select>
 
     <input type="text" id="customUserInput" placeholder="或輸入名稱，例如：王大明" />
-    <input type="text" id="customTimeInput" placeholder="時間，例如：0921 09:00~11:00" />
+    <label for="dateSelect">日期：</label>
+    <select id="dateSelect"></select>
+
+    <label for="startHour">開始時間：</label>
+    <select id="startHour"></select> :
+    <select id="startMinute"></select>
+
+    <label for="endHour">結束時間：</label>
+    <select id="endHour"></select> :
+    <select id="endMinute"></select>
     <button onclick="applyCustomUserAndTime()">套用</button>
 </div>
 
@@ -435,6 +485,7 @@ function applyCustomUserAndTime() {
 
 </body>
 </html>
+
 
 
 
