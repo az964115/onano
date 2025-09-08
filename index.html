@@ -612,13 +612,15 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
     </select>
 
     <input type="text" id="customUserInput" placeholder="或輸入名稱，例如：王大明" />
+    <div>
     <label for="monthSelect">月份：</label>
     <select id="monthSelect"></select>
 
     <label for="daySelect">日期：</label>
     <select id="daySelect"></select>
+    </div>
 
-
+    <div>
     <label for="startHour">開始時間：</label>
     <select id="startHour"></select> :
     <select id="startMinute"></select>
@@ -629,6 +631,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
     <button onclick="applyCustomUserAndTime()">套用</button>
     <button onclick="reserveForFuture()">預約</button>
     <p id="currentUserInfo" style="margin-top: 10px;"></p>
+    </div>
 </div>
 
     <div id="newsTicker">
@@ -674,6 +677,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
