@@ -3,44 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>悅城會議室預約系統:小劉製
+    <title>悅城會議室預約系統 - 小劉製
     </title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-        let customUserWithTime = ""; // 全域變數儲存輸入的結果
-let customEndTime = null;
-
-function applyUserWithTime() {
-    const userInput = document.getElementById("customUserInput").value.trim();
-    const timeInput = document.getElementById("customTimeInput").value.trim();
-
-    if (!userInput || !timeInput) {
-        alert("請輸入使用者名稱和時間！");
-        return;
-    }
-
-    const timePattern = /^(\d{2}:\d{2})~(\d{2}:\d{2})$/;
-    const match = timeInput.match(timePattern);
-
-    if (!match) {
-        alert("時間格式錯誤，請使用 09:00~11:00 格式");
-        return;
-    }
-
-    const today = new Date();
-    const endTimeStr = match[2]; 
-    const [endHour, endMinute] = endTimeStr.split(":");
-    const endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, endMinute);
-
-    customUserWithTime = `${userInput} - ${timeInput}`;
-    customEndTime = endTime;
-
-    localStorage.setItem("selectedUser", customUserWithTime);
-
-    alert(`已套用：${customUserWithTime}`);
-}
-window.applyCustomUserAndTime = applyCustomUserAndTime;
 
         const firebaseConfig = {
             apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
@@ -61,63 +28,6 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
             "吳德宏", "王清鴻", "留瑞蓮", "李家維", "李滋芳", "劉俊彥",  "廠商", "其他", "管理者"  // 
         ];
 
-        function addCustomUser() {
-    const input = document.getElementById("customUserInput");
-    const userSelect = document.getElementById("userSelect");
-    const name = input.value.trim();
-    if (!name) {
-        alert("請輸入名稱");
-        return;
-    }
-
-            function applyCustomTime() {
-    const timeInput = document.getElementById("customTimeInput").value.trim();
-    const userSelect = document.getElementById("userSelect");
-    let selectedUser = userSelect.value;
-
-    if (!selectedUser) {
-        alert("請先選擇使用者！");
-        return;
-    }
-
-    if (!timeInput) {
-        alert("請輸入使用時間！");
-        return;
-    }
-
-    const nameOnly = selectedUser.split('(')[0].trim();
-
-    const newName = `${nameOnly} (${timeInput})`;
-
-    const options = userSelect.options;
-    for (let i = 0; i < options.length; i++) {
-        if (options[i].value === selectedUser) {
-            options[i].value = newName;
-            options[i].textContent = newName;
-            userSelect.value = newName;
-            localStorage.setItem("selectedUser", newName);
-            break;
-        }
-    }
-
-    document.getElementById("customTimeInput").value = "";
-}
-    for (let i = 0; i < userSelect.options.length; i++) {
-        if (userSelect.options[i].value === name) {
-            userSelect.value = name;
-            localStorage.setItem("selectedUser", name);
-            input.value = "";
-            return;
-        }
-    }
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    userSelect.appendChild(option);
-    userSelect.value = name;
-    localStorage.setItem("selectedUser", name);
-    input.value = "";
-}
     let finalSelectedUser = ""; 
 let finalEndTime = null;   
 
@@ -525,6 +435,7 @@ function applyCustomUserAndTime() {
 
 </body>
 </html>
+
 
 
 
