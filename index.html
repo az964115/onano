@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>悅城會議室預約系統 - 小劉製
     </title>
+    let isAdmin = false;
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
@@ -281,7 +282,6 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
             const customInput = document.getElementById("customUserInput");
             customInput.disabled = true; // 初始為關閉
-            let isAdmin = false;
             userSelect.addEventListener("change", (e) => {
     const selectedUser = e.target.value;
     if (selectedUser === "管理者") {
@@ -675,6 +675,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
