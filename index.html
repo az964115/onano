@@ -39,7 +39,7 @@ function populateTimeSelectors() {
 
     [startHour, startMinute, endHour, endMinute].forEach(select => select.innerHTML = "");
 
-    for (let h = 0; h < 24; h++) {
+    for (let h = 8; h < 20; h++) {
         const hStr = h.toString().padStart(2, '0');
         const opt1 = new Option(hStr, hStr);
         const opt2 = new Option(hStr, hStr);
@@ -519,6 +519,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
