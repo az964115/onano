@@ -121,6 +121,8 @@ function applyCustomUserAndTime() {
         infoElem.style.color = "green";
     }
 }
+window.applyCustomUserAndTime = applyCustomUserAndTime;
+
         window.onload = function() {
             const userSelect = document.getElementById("userSelect");
             users.forEach(user => {
@@ -517,6 +519,7 @@ function applyCustomUserAndTime() {
 
 </body>
 </html>
+
 
 
 
