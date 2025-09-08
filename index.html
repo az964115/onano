@@ -101,7 +101,7 @@ function reserveForFuture() {
             li.textContent = `${res.roomId} - ${res.user}（${localTime}）`;
 
             // ✅ 只有管理者能看到刪除按鈕
-            if (currentUser === "管理者") {
+            if (isAdmin) {
                 const deleteBtn = document.createElement("button");
                 deleteBtn.textContent = "刪除";
                 deleteBtn.style.marginLeft = "10px";
@@ -147,7 +147,6 @@ function monitorFutureReservations() {
                     const cell = document.getElementById(roomId);
 
                     if (cell && cell.classList.contains('green')) {
-                        // 套用佔用
                         cell.classList.remove('green');
                         cell.classList.add('red');
                         cell.textContent = `${roomId} - ${res.user}`;
@@ -166,14 +165,12 @@ function monitorFutureReservations() {
                             time: new Date().toISOString(),
                             endTime: res.endTime
                         });
-
-                        // 移除該預約
                         remove(ref(db, `futureReservations/${key}`));
                     }
                 }
             });
         });
-    }, 30000); // 每 30 秒檢查
+    }, 10000); //每10秒檢查
 }
 
 function populateTimeSelectors() {
@@ -284,31 +281,35 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
             const customInput = document.getElementById("customUserInput");
             customInput.disabled = true; // 初始為關閉
-            
+            let isAdmin = false;
             userSelect.addEventListener("change", (e) => {
-                const selectedUser = e.target.value;
-                if (selectedUser === "管理者") {
-                    const password = prompt("請輸入密碼以選擇管理者:");
-                    if (password === "Onano_Nb") {
-                        localStorage.setItem("selectedUser", selectedUser);
-                        e.target.value = "管理者";  // ✅ 強制保留選項
-                    } else {
-                        alert("密碼錯誤！");
-                        e.target.value = "";
-                    }
-                } else {
-                    localStorage.setItem("selectedUser", selectedUser);
-                }
+    const selectedUser = e.target.value;
+    if (selectedUser === "管理者") {
+        const password = prompt("請輸入密碼以選擇管理者:");
+        if (password === "Onano_Nb") {
+            localStorage.setItem("selectedUser", selectedUser);
+            e.target.value = "管理者";
+            isAdmin = true; // ✅ 登入成功
+        } else {
+            alert("密碼錯誤！");
+            e.target.value = "";
+            isAdmin = false;
+        }
+    } else {
+        localStorage.setItem("selectedUser", selectedUser);
+        isAdmin = false;
+    }
 
-                 // ✅ 控制輸入框是否啟用
             if (selectedUser === "其他") {
-                customInput.disabled = false;
-                customInput.focus();
-            } else {
-                customInput.disabled = true;
-                customInput.value = "";
-            }
-            });
+        customInput.disabled = false;
+        customInput.focus();
+    } else {
+        customInput.disabled = true;
+        customInput.value = "";
+    }
+
+    loadFutureReservations(); // ✅ 每次身份變化時重新載入
+});
 
             updateBlockStatus(); 
             displayDateTime();
@@ -674,5 +675,6 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
