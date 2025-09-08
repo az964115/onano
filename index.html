@@ -7,7 +7,7 @@
     </title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAw3jQ3tQ4FqMvuW2yK_ziK8X17FxuPUkI",
@@ -30,6 +30,124 @@
 
     let finalSelectedUser = ""; 
 let finalEndTime = null;   
+
+function reserveForFuture() {
+    if (!finalSelectedUser || !finalEndTime) {
+        alert("請先套用使用者與時間！");
+        return;
+    }
+
+    const roomId = prompt("請輸入要預約的會議室編號（例如：102）：");
+    if (!roomId || !document.getElementById(roomId)) {
+        alert("無效的會議室 ID");
+        return;
+    }
+
+    const month = document.getElementById("monthSelect").value;
+    const day = document.getElementById("daySelect").value;
+    const startHour = document.getElementById("startHour").value;
+    const startMinute = document.getElementById("startMinute").value;
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const startTime = new Date(year, month - 1, day, startHour, startMinute);
+
+    const reservationData = {
+        roomId: roomId,
+        user: finalSelectedUser,
+        startTime: startTime.toISOString(),
+        endTime: finalEndTime.toISOString()
+    };
+
+    const futureRef = ref(db, `futureReservations/${roomId}_${startTime.getTime()}`);
+    set(futureRef, reservationData)
+        .then(() => {
+            alert("✅ 已預約成功！");
+            loadFutureReservations(); // 重新載入
+        })
+        .catch(err => {
+            alert("預約失敗：" + err);
+        });
+}
+        function loadFutureReservations() {
+    const listElem = document.getElementById("futureReservationsList");
+    listElem.innerHTML = "";
+
+    const futureRef = ref(db, 'futureReservations');
+    onValue(futureRef, snapshot => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const now = Date.now();
+
+        const sorted = Object.entries(data).sort((a, b) => {
+            return new Date(a[1].startTime) - new Date(b[1].startTime);
+        });
+
+        sorted.forEach(([key, res]) => {
+            const li = document.createElement("li");
+
+            const start = new Date(res.startTime);
+            const options = {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            };
+            const localTime = start.toLocaleString('zh-TW', options);
+
+            li.textContent = `${res.roomId} - ${res.user}（${localTime}）`;
+
+            listElem.appendChild(li);
+        });
+    });
+}
+function monitorFutureReservations() {
+    setInterval(() => {
+        const now = new Date();
+
+        const futureRef = ref(db, 'futureReservations');
+        get(futureRef).then(snapshot => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            Object.entries(data).forEach(([key, res]) => {
+                const startTime = new Date(res.startTime);
+
+                if (now >= startTime) {
+                    const roomId = res.roomId;
+                    const cell = document.getElementById(roomId);
+
+                    if (cell && cell.classList.contains('green')) {
+                        // 套用佔用
+                        cell.classList.remove('green');
+                        cell.classList.add('red');
+                        cell.textContent = `${roomId} - ${res.user}`;
+
+                        const colorRef = ref(db, roomId);
+                        set(colorRef, {
+                            color: 'red',
+                            user: res.user,
+                            endTime: res.endTime
+                        });
+
+                        push(recordsRef, {
+                            id: roomId,
+                            action: '使用中（自動）',
+                            user: res.user,
+                            time: new Date().toISOString(),
+                            endTime: res.endTime
+                        });
+
+                        // 移除該預約
+                        remove(ref(db, `futureReservations/${key}`));
+                    }
+                }
+            });
+        });
+    }, 30000); // 每 30 秒檢查
+}
 
 function populateTimeSelectors() {
     const startHour = document.getElementById("startHour");
@@ -165,7 +283,10 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
             });
 
             updateBlockStatus(); 
-        displayDateTime();
+            displayDateTime();
+            loadFutureReservations();
+            monitorFutureReservations();
+
         setInterval(displayDateTime, 1000);
         };
 
@@ -324,6 +445,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
         window.toggleColor = toggleColor;
         window.showRecords = showRecords;
+        window.reserveForFuture = reserveForFuture;
     </script>
 
     <style>
@@ -451,6 +573,10 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
         <img id="systemImage" src="https://i.meee.com.tw/VFCitmP.png" alt="悅城會議室預約系統圖片" />
     </a>
 <div>
+    <div>
+    <h2>📅 未來預約時程</h2>
+    <ul id="futureReservationsList"></ul>
+</div>
     <label for="userSelect">選擇用戶: </label>
     <select id="userSelect">
         <option value="">請選擇</option>
@@ -473,6 +599,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
     <select id="endHour"></select> :
     <select id="endMinute"></select>
     <button onclick="applyCustomUserAndTime()">套用</button>
+    <button onclick="reserveForFuture()">預約</button>
     <p id="currentUserInfo" style="margin-top: 10px;"></p>
 </div>
 
@@ -519,21 +646,3 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
