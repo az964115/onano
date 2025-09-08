@@ -71,35 +71,41 @@ function populateTimeSelectors() {
 }
         
 function applyCustomUserAndTime() {
-    const dropdownUser = document.getElementById("userSelect").value.trim();
+    const dropdownUser = document.getElementById("userSelect").value;
     const customName = document.getElementById("customUserInput").value.trim();
 
-    const datePart = document.getElementById("dateSelect").value;
+    const month = document.getElementById("monthSelect").value;
+    const day = document.getElementById("daySelect").value;
     const startHour = document.getElementById("startHour").value;
     const startMinute = document.getElementById("startMinute").value;
     const endHour = document.getElementById("endHour").value;
     const endMinute = document.getElementById("endMinute").value;
 
-    if (!dropdownUser && !customName) {
-        alert("請選擇或輸入使用者名稱");
+    // ✅ 使用者選擇 "其他" 時，才必須輸入名稱
+    if (dropdownUser === "其他") {
+        if (!customName) {
+            alert("請輸入名稱，例如：王大明");
+            return;
+        }
+    } else {
+        if (!dropdownUser || dropdownUser === "") {
+            alert("請選擇使用者名稱");
+            return;
+        }
+    }
+
+    if (!month || !day || !startHour || !startMinute || !endHour || !endMinute) {
+        alert("請完整選擇時間（月份、日期、開始時間、結束時間）");
         return;
     }
 
-    if (!datePart || !startHour || !startMinute || !endHour || !endMinute) {
-        alert("請完整選擇時間（日期、開始時間、結束時間）");
-        return;
-    }
-
-    const user = customName || dropdownUser;
-    const fullTimeString = `${datePart} ${startHour}:${startMinute}~${endHour}:${endMinute}`;
+    const user = dropdownUser === "其他" ? customName : dropdownUser;
+    const fullTimeString = `${month}${day} ${startHour}:${startMinute}~${endHour}:${endMinute}`;
     const finalUserInfo = `${user} - ${fullTimeString}`;
 
     const today = new Date();
     const year = today.getFullYear();
-    const month = parseInt(datePart.slice(0, 2), 10) - 1; 
-    const day = parseInt(datePart.slice(2), 10);
-
-    finalEndTime = new Date(year, month, day, parseInt(endHour), parseInt(endMinute));
+    finalEndTime = new Date(year, parseInt(month) - 1, parseInt(day), parseInt(endHour), parseInt(endMinute));
     finalSelectedUser = finalUserInfo;
 
     localStorage.setItem("selectedUser", finalUserInfo);
@@ -118,7 +124,9 @@ function applyCustomUserAndTime() {
             if (savedUser) {
                 userSelect.value = savedUser;
             }
-
+            const customInput = document.getElementById("customUserInput");
+            customInput.disabled = true; // 初始為關閉
+            
             userSelect.addEventListener("change", (e) => {
                 const selectedUser = e.target.value;
                 if (selectedUser === "管理者") {
@@ -132,6 +140,15 @@ function applyCustomUserAndTime() {
                 } else {
                     localStorage.setItem("selectedUser", selectedUser);
                 }
+
+                 // ✅ 控制輸入框是否啟用
+            if (selectedUser === "其他") {
+                customInput.disabled = false;
+                customInput.focus();
+            } else {
+                customInput.disabled = true;
+                customInput.value = "";
+            }
             });
 
             updateBlockStatus(); 
@@ -378,7 +395,6 @@ function applyCustomUserAndTime() {
             max-width: 10%;
             height: auto;
         }
-        /*  */
         #newsTicker {
             background-color: #f8f9fa;
             padding: 10px;
@@ -400,6 +416,12 @@ function applyCustomUserAndTime() {
                 transform: translateX(-100%);
             }
         }
+        #customUserInput {
+        width: 200px;
+        padding: 5px;
+        font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
@@ -483,6 +505,7 @@ function applyCustomUserAndTime() {
 
 </body>
 </html>
+
 
 
 
