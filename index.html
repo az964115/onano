@@ -100,7 +100,15 @@ function reserveForFuture() {
             };
             const localTime = start.toLocaleString('zh-TW', options);
 
-            li.textContent = `${res.roomId} - ${res.user}（${localTime}）`;
+            const end = new Date(res.endTime);
+
+            const startStr = `${start.getMonth() + 1}/${start.getDate()} ${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
+            const endStr = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+            const fullDateStr = `${start.getFullYear()}-${startStr}~${endStr}`;
+            const friendlyStart = `${start.getMonth() + 1}/${start.getDate()} ${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
+
+            li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${friendlyStart}）`;
+
 
             if (isAdmin) {
                 const deleteBtn = document.createElement("button");
@@ -689,6 +697,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
