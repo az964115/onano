@@ -64,7 +64,7 @@ function reserveForFuture() {
     set(futureRef, reservationData)
         .then(() => {
             alert("✅ 已預約成功！");
-            loadFutureReservations(); // 重新載入
+            loadFutureReservations(); 
         })
         .catch(err => {
             alert("預約失敗：" + err);
@@ -101,7 +101,6 @@ function reserveForFuture() {
 
             li.textContent = `${res.roomId} - ${res.user}（${localTime}）`;
 
-            // ✅ 只有管理者能看到刪除按鈕
             if (isAdmin) {
                 const deleteBtn = document.createElement("button");
                 deleteBtn.textContent = "刪除";
@@ -113,7 +112,7 @@ function reserveForFuture() {
                         remove(ref(db, `futureReservations/${key}`))
                             .then(() => {
                                 alert("✅ 預約已刪除");
-                                loadFutureReservations(); // 重新載入
+                                loadFutureReservations(); 
                             })
                             .catch(err => {
                                 alert("❌ 刪除失敗：" + err);
@@ -171,7 +170,7 @@ function monitorFutureReservations() {
                 }
             });
         });
-    }, 10000); //每10秒檢查
+    }, 10000); //每10秒檢查時間去改變格子狀態
 }
 
 function populateTimeSelectors() {
@@ -214,7 +213,7 @@ function populateTimeSelectors() {
 }
         
 function applyCustomUserAndTime() {
-    console.log("applyCustomUserAndTime triggered"); // 測試用
+    console.log("applyCustomUserAndTime triggered"); 
 
     const dropdownUser = document.getElementById("userSelect").value;
     const customName = document.getElementById("customUserInput").value.trim();
@@ -244,7 +243,6 @@ function applyCustomUserAndTime() {
     }
 
     const user = dropdownUser === "其他" ? customName : dropdownUser;
-    // 改成更人性化日期格式
     const fullTimeString = `${parseInt(month)}/${parseInt(day)} ${startHour}:${startMinute}~${endHour}:${endMinute}`;
     const finalUserInfo = `${user} - ${fullTimeString}`;
 
@@ -257,7 +255,6 @@ function applyCustomUserAndTime() {
 
     alert(`✅ 已套用：${finalUserInfo}`);
 
-    // 可以在頁面顯示目前套用資訊 (建議先加一個 id=currentUserInfo 的 <p> 標籤)
     const infoElem = document.getElementById("currentUserInfo");
     if(infoElem){
         infoElem.textContent = `已套用使用者：${finalUserInfo}`;
@@ -289,7 +286,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
         if (password === "Onano_Nb") {
             localStorage.setItem("selectedUser", selectedUser);
             e.target.value = "管理者";
-            isAdmin = true; // ✅ 登入成功
+            isAdmin = true; 
         } else {
             alert("密碼錯誤！");
             e.target.value = "";
@@ -308,7 +305,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
         customInput.value = "";
     }
 
-    loadFutureReservations(); // ✅ 每次身份變化時重新載入
+    loadFutureReservations(); 
 });
 
             updateBlockStatus(); 
@@ -372,7 +369,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
             if (element.classList.contains('green')) {
                 element.classList.remove('green');
                 element.classList.add('red');
-                // 格子內容：會議室ID + 完整套用資訊
+                // 
                 element.textContent = `${id} - ${finalSelectedUser}`;
 
                 const newRecord = {
@@ -677,6 +674,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
