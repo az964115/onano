@@ -113,7 +113,7 @@ function reserveForFuture() {
             const fullDateStr = `${year}-${month}/${date} ${startHour}:${startMin}~${endHour}:${endMin}`;
             const friendlyStart = `${month}/${date} ${startHour}:${startMin}`;
 
-            li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${friendlyStart}）`;
+            li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${month}/${date} ${startHour}:${startMin}）`;
 
             if (isAdmin) {
                 const deleteBtn = document.createElement("button");
@@ -702,6 +702,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
