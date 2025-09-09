@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>悅城會議室預約系統 - 小劉製
+    <title>悅城會議室預約系統 - 2025新版
     </title>
     <script type="module">
         let isAdmin = false;
@@ -44,6 +44,7 @@ function reserveForFuture() {
         return;
     }
 
+    const year = document.getElementById("yearSelect").value;
     const month = document.getElementById("monthSelect").value;
     const day = document.getElementById("daySelect").value;
     const startHour = document.getElementById("startHour").value;
@@ -196,12 +197,18 @@ function populateTimeSelectors() {
         startMinute.appendChild(opt1);
         endMinute.appendChild(opt2);
     }
+    const yearSelect = document.getElementById("yearSelect");
     const monthSelect = document.getElementById("monthSelect");
     const daySelect = document.getElementById("daySelect");
 
+    yearSelect.innerHTML = "";
     monthSelect.innerHTML = "";
     daySelect.innerHTML = "";
 
+    for (let m = 114; m <= 124; m++) {
+        const mm = m.toString().padStart(2, '0');
+        yearSelect.appendChild(new Option(mm, mm));
+    }
     for (let m = 1; m <= 12; m++) {
         const mm = m.toString().padStart(2, '0');
         monthSelect.appendChild(new Option(mm, mm));
@@ -610,6 +617,9 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
     <input type="text" id="customUserInput" placeholder="請先點選:其他~才可輸入名稱" />
     <div>
+    <label for="yearSelect">年分：</label>
+    <select id="yearSelect"></select>
+        
     <label for="monthSelect">月份：</label>
     <select id="monthSelect"></select>
 
@@ -674,6 +684,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
