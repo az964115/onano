@@ -44,7 +44,7 @@ function reserveForFuture() {
         return;
     }
 
-    const year = document.getElementById("yearSelect").value;
+    const selectedYear = document.getElementById("yearSelect").value;
     const month = document.getElementById("monthSelect").value;
     const day = document.getElementById("daySelect").value;
     const startHour = document.getElementById("startHour").value;
@@ -52,7 +52,7 @@ function reserveForFuture() {
 
     const today = new Date();
     const year = today.getFullYear();
-    const startTime = new Date(year, month - 1, day, startHour, startMinute);
+    const startTime = new Date(selectedYear, month - 1, day, startHour, startMinute);
 
     const reservationData = {
         roomId: roomId,
@@ -205,9 +205,8 @@ function populateTimeSelectors() {
     monthSelect.innerHTML = "";
     daySelect.innerHTML = "";
 
-    for (let m = 2025; m <= 2050; m++) {
-        const mm = m.toString().padStart(2, '0');
-        yearSelect.appendChild(new Option(mmmm, mmmm));
+    for (let y = 2025; y <= 2050; y++) {
+    yearSelect.appendChild(new Option(y.toString(), y.toString()));
     }
     for (let m = 1; m <= 12; m++) {
         const mm = m.toString().padStart(2, '0');
@@ -225,7 +224,6 @@ function applyCustomUserAndTime() {
     const dropdownUser = document.getElementById("userSelect").value;
     const customName = document.getElementById("customUserInput").value.trim();
 
-    const year = document.getElementById("yearSelect").value;
     const month = document.getElementById("monthSelect").value;
     const day = document.getElementById("daySelect").value;
     const startHour = document.getElementById("startHour").value;
@@ -255,7 +253,6 @@ function applyCustomUserAndTime() {
     const finalUserInfo = `${user} - ${fullTimeString}`;
 
     const today = new Date();
-    const year = today.getFullYear();
     finalEndTime = new Date(year, parseInt(month) - 1, parseInt(day), parseInt(endHour), parseInt(endMinute));
     finalSelectedUser = finalUserInfo;
 
@@ -685,6 +682,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
