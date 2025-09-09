@@ -115,6 +115,7 @@ function reserveForFuture() {
 
             li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${friendlyStart}）`;
 
+
             if (isAdmin) {
                 const deleteBtn = document.createElement("button");
                 deleteBtn.textContent = "刪除";
@@ -702,6 +703,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
