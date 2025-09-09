@@ -252,8 +252,15 @@ function applyCustomUserAndTime() {
     const fullTimeString = `${parseInt(month)}/${parseInt(day)} ${startHour}:${startMinute}~${endHour}:${endMinute}`;
     const finalUserInfo = `${user} - ${fullTimeString}`;
 
-    const today = new Date();
-    finalEndTime = new Date(year, parseInt(month) - 1, parseInt(day), parseInt(endHour), parseInt(endMinute));
+    const selectedYear = document.getElementById("yearSelect").value;
+    finalEndTime = new Date(
+        parseInt(selectedYear),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(endHour),
+        parseInt(endMinute)
+    );
+
     finalSelectedUser = finalUserInfo;
 
     localStorage.setItem("selectedUser", finalUserInfo);
@@ -682,6 +689,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
