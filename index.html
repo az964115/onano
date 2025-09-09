@@ -205,9 +205,9 @@ function populateTimeSelectors() {
     monthSelect.innerHTML = "";
     daySelect.innerHTML = "";
 
-    for (let m = 114; m <= 124; m++) {
+    for (let m = 2025; m <= 2050; m++) {
         const mm = m.toString().padStart(2, '0');
-        yearSelect.appendChild(new Option(mm, mm));
+        yearSelect.appendChild(new Option(mmmm, mmmm));
     }
     for (let m = 1; m <= 12; m++) {
         const mm = m.toString().padStart(2, '0');
@@ -225,6 +225,7 @@ function applyCustomUserAndTime() {
     const dropdownUser = document.getElementById("userSelect").value;
     const customName = document.getElementById("customUserInput").value.trim();
 
+    const year = document.getElementById("yearSelect").value;
     const month = document.getElementById("monthSelect").value;
     const day = document.getElementById("daySelect").value;
     const startHour = document.getElementById("startHour").value;
@@ -617,7 +618,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
     <input type="text" id="customUserInput" placeholder="請先點選:其他~才可輸入名稱" />
     <div>
-    <label for="yearSelect">年分：</label>
+    <label for="yearSelect">年份：</label>
     <select id="yearSelect"></select>
         
     <label for="monthSelect">月份：</label>
@@ -684,6 +685,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
