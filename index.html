@@ -263,6 +263,7 @@ function applyCustomUserAndTime() {
 
     const user = dropdownUser === "其他" ? customName : dropdownUser;
     const fullTimeString = `${parseInt(month)}/${parseInt(day)} ${startHour}:${startMinute}~${endHour}:${endMinute}`;
+    const finalUserInfo = `${user} - ${fullTimeString}`;
 
     const selectedYear = document.getElementById("yearSelect").value;
     finalEndTime = new Date(
@@ -273,15 +274,15 @@ function applyCustomUserAndTime() {
         parseInt(endMinute)
     );
 
-    finalSelectedUser = user;
+    finalSelectedUser = finalUserInfo;
 
-    localStorage.setItem("selectedUser", user);
+    localStorage.setItem("selectedUser", finalUserInfo);
 
     alert(`✅ 已套用：${finalUserInfo}`);
 
     const infoElem = document.getElementById("currentUserInfo");
     if(infoElem){
-        infoElem.textContent = `已套用使用者：${user} - ${fullTimeString}`;
+        infoElem.textContent = `已套用使用者：${finalUserInfo}`;
         infoElem.style.color = "green";
     }
 }
@@ -701,7 +702,6 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
-
 
 
 
