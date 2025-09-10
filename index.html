@@ -271,8 +271,8 @@ const applyCustomUserAndTime = () => {
         return;
     }
 
-    const fullStartTimeString = `${selectedYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${startHour}:${startMinute}`;
-    const fullEndTimeString   = `${selectedYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${endHour}:${endMinute}`;
+    const fullStartTimeString = `${selectedYear}/${month.padStart(2, '0')}/${day.padStart(2, '0')} ${startHour}:${startMinute}`;
+    const fullEndTimeString   = `${selectedYear}/${month.padStart(2, '0')}/${day.padStart(2, '0')} ${endHour}:${endMinute}`;
 
     finalEndTime = new Date(
         parseInt(selectedYear),
@@ -282,18 +282,23 @@ const applyCustomUserAndTime = () => {
         parseInt(endMinute)
     );
 
-    finalSelectedUser = user; 
+    // ✅ 只存名字
+    finalSelectedUser = user;
+
+    // ✅ 顯示用：名字 + 時間段
+    const displayInfo = `${user} - ${fullStartTimeString} ~ ${fullEndTimeString}`;
 
     localStorage.setItem("selectedUser", finalSelectedUser);
 
-    alert(`✅ 已套用：${finalSelectedUser} - ${fullStartTimeString} ~ ${fullEndTimeString}`);
+    alert(`✅ 已套用：${displayInfo}`);
 
     const infoElem = document.getElementById("currentUserInfo");
     if(infoElem){
-        infoElem.textContent = `已套用使用者：${finalSelectedUser} - ${fullStartTimeString} ~ ${fullEndTimeString}`;
+        infoElem.textContent = `已套用使用者：${displayInfo}`;
         infoElem.style.color = "green";
     }
 };
+
 
 window.applyCustomUserAndTime = applyCustomUserAndTime;
 
@@ -711,6 +716,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
