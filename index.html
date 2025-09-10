@@ -29,9 +29,23 @@
             "吳德宏", "王清鴻", "留瑞蓮", "李家維", "李滋芳", "劉俊彥",  "廠商", "其他", "管理者"  // 
         ];
 
-    let finalSelectedUser = ""; 
-let finalEndTime = null;   
+    let finalSelectedUser = null;  // 預設為空
+    let finalEndTime = null;  // 預設為空   
 
+function applyCustomUserAndTime() {
+    const userSelect = document.getElementById("userSelect");
+    finalSelectedUser = userSelect.value;  // 設定選擇的使用者名稱
+
+    const endHour = document.getElementById("endHour").value;
+    const endMinute = document.getElementById("endMinute").value;
+    finalEndTime = new Date();
+    finalEndTime.setHours(endHour);
+    finalEndTime.setMinutes(endMinute);  // 設定結束時間
+
+    // 顯示當前選擇的使用者與時間
+    const currentUserInfo = document.getElementById("currentUserInfo");
+    currentUserInfo.textContent = `選擇的使用者: ${finalSelectedUser}, 結束時間: ${finalEndTime.toLocaleString()}`;
+}
 function reserveForFuture() {
     if (!finalSelectedUser || !finalEndTime) {
         alert("請先套用使用者與時間！");
@@ -383,6 +397,8 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
             allCells.forEach(cell => {
                 const id = cell.id;
                 const colorRef = ref(db, id);
+        
+                // 監聽 Firebase 變動
                 onValue(colorRef, (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
@@ -398,23 +414,25 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                         cell.classList.add('green');
                         cell.textContent = `${id}`;
                     }
+                }, (error) => {
+                    console.error("讀取資料錯誤：", error);
                 });
             });
-        }
         function toggleColor(element) {
             const id = element.id;
 
-            if(!finalSelectedUser){
+            // 檢查是否選擇了用戶名稱與時間
+            if (!finalSelectedUser || !finalEndTime) {
                 alert("請先套用使用者名稱與時間！");
                 return;
             }
 
             const colorRef = ref(db, id);
 
+            // 切換顏色
             if (element.classList.contains('green')) {
                 element.classList.remove('green');
                 element.classList.add('red');
-                // 
                 element.textContent = `${id} - ${finalSelectedUser}`;
 
                 const newRecord = {
@@ -425,27 +443,30 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                     endTime: finalEndTime ? finalEndTime.toISOString() : null
                 };
 
+                // 更新資料庫
                 set(colorRef, {
                     color: 'red',
                     user: finalSelectedUser,
                     endTime: finalEndTime ? finalEndTime.toISOString() : null
-                });
+                }).catch(error => console.error("更新資料庫錯誤：", error));
 
-                push(recordsRef, newRecord);
-
+                // 記錄新增到歷史紀錄
+                push(recordsRef, newRecord).catch(error => console.error("新增紀錄錯誤：", error));
             } else if (element.classList.contains('red')) {
                 element.classList.remove('red');
                 element.classList.add('green');
                 element.textContent = id;
 
-                set(colorRef, { color: 'green' });
+        // 更新資料庫
+                set(colorRef, { color: 'green' }).catch(error => console.error("更新資料庫錯誤：", error));
 
+        // 記錄空閒
                 push(recordsRef, {
                     id: id,
                     action: '空閒',
                     user: finalSelectedUser,
                     time: new Date().toISOString()
-                });
+                }).catch(error => console.error("新增紀錄錯誤：", error));
             }
         }
 
@@ -466,14 +487,15 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                         const recordDate = new Date(record.time);
                         const recordDateStr = recordDate.toISOString().split('T')[0];
 
+                        // 過濾邏輯
                         const isCarNumberMatch = carNumber === "" || record.id.toLowerCase().includes(carNumber);
                         const isUserMatch = selectedUser === "管理者" || record.user === selectedUser;
 
                         return isCarNumberMatch && isUserMatch;
                     })
-                    .reverse();
+                    .reverse(); // 顯示最新的紀錄
 
-                recordList.innerHTML = ''; 
+                recordList.innerHTML = '';
 
                 filteredRecords.forEach(([key, record]) => {
                     const recordItem = document.createElement("li");
@@ -494,12 +516,13 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
                     const deleteButton = document.createElement("button");
                     deleteButton.textContent = "刪除";
-                    deleteButton.onclick = function() {
+                    deleteButton.onclick = function () {
                         const password = prompt("請輸入密碼以刪除紀錄:");
                         if (password === "Onano_Nb") {
+                            // 刪除紀錄
                             remove(ref(db, 'records/' + key)).then(() => {
                                 alert("紀錄已刪除！");
-                                showRecords();  
+                                showRecords();  // 刷新顯示
                             }).catch((error) => {
                                 alert("刪除失敗：" + error);
                             });
@@ -511,6 +534,8 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                     recordItem.appendChild(deleteButton);
                     recordList.appendChild(recordItem);
                 });
+            }, (error) => {
+                console.error("讀取紀錄錯誤：", error);
             });
         }
 
@@ -722,6 +747,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
