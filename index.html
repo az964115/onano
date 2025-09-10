@@ -282,15 +282,15 @@ const applyCustomUserAndTime = () => {
         parseInt(endMinute)
     );
 
-    finalSelectedUser = `${user} - ${fullStartTimeString} ~ ${fullEndTimeString}`;
+    finalSelectedUser = user; 
 
     localStorage.setItem("selectedUser", finalSelectedUser);
 
-    alert(`✅ 已套用：${finalSelectedUser}`);
+    alert(`✅ 已套用：${finalSelectedUser} - ${fullStartTimeString} ~ ${fullEndTimeString}`);
 
     const infoElem = document.getElementById("currentUserInfo");
     if(infoElem){
-        infoElem.textContent = `已套用使用者：${finalSelectedUser}`;
+        infoElem.textContent = `已套用使用者：${finalSelectedUser} - ${fullStartTimeString} ~ ${fullEndTimeString}`;
         infoElem.style.color = "green";
     }
 };
@@ -711,6 +711,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
