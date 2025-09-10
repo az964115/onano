@@ -49,6 +49,8 @@ function reserveForFuture() {
     const day = document.getElementById("daySelect").value;
     const startHour = document.getElementById("startHour").value;
     const startMinute = document.getElementById("startMinute").value;
+    const endHour = document.getElementById("endHour").value;
+    const endMinute = document.getElementById("endMinute").value;
 
     const today = new Date();
     const year = today.getFullYear();
@@ -65,7 +67,7 @@ function reserveForFuture() {
         endTime: formattedEndTime,      // 使用格式化的日期字串
     };
 
-    const futureRef = ref(db, `futureReservations/${roomId}_${startTime.getTime()}`);
+    const futureRef = ref(db, `futureReservations/${roomId}_${new Date(selectedYear, month - 1, day, startHour, startMinute).getTime()}`);
     set(futureRef, reservationData)
         .then(() => {
             alert("✅ 已預約成功！");
@@ -75,7 +77,7 @@ function reserveForFuture() {
             alert("預約失敗：" + err);
         });
 }
-        function loadFutureReservations() {
+function loadFutureReservations() {
     const listElem = document.getElementById("futureReservationsList");
     listElem.innerHTML = "";
 
@@ -116,6 +118,7 @@ function reserveForFuture() {
 
             const fullDateStr = `${res.endTime}~${res.endTime}`;
             const friendlyStart = `${res.startTime}`;
+            
             li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${friendlyStart}）`;
 
 
@@ -708,6 +711,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
