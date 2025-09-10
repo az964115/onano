@@ -410,7 +410,11 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                         cell.classList.remove('green', 'red');
                         cell.classList.add(data.color);
                         if (data.color === 'red') {
-                            cell.textContent = `${id} - ${data.user}`;
+                            cell.textContent = `${id} - ${data.user} - ${
+                                data.startTime ? new Date(data.startTime).toLocaleString('zh-TW') : ''
+                            } ~ ${
+                                data.endTime ? new Date(data.endTime).toLocaleString('zh-TW') : ''
+                            }`;
                         } else {
                             cell.textContent = `${id}`;
                         }
@@ -751,6 +755,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
