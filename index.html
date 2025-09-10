@@ -263,7 +263,8 @@ function applyCustomUserAndTime() {
     }
 
     const user = dropdownUser === "其他" ? customName : dropdownUser;
-    const fullTimeString = `${parseInt(month)}/${parseInt(day)} ${startHour}:${startMinute}~${endHour}:${endMinute}`;
+    const fullStartTimeString = `${selectedYear}-${parseInt(month).toString().padStart(2, '0')}-${parseInt(day).toString().padStart(2, '0')} ${startHour}:${startMinute}`;
+    const fullEndTimeString = `${selectedYear}-${parseInt(month).toString().padStart(2, '0')}-${parseInt(day).toString().padStart(2, '0')} ${endHour}:${endMinute}`;
     const finalUserInfo = `${user} - ${fullTimeString}`;
 
     const selectedYear = document.getElementById("yearSelect").value;
@@ -703,6 +704,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
