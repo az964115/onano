@@ -163,57 +163,57 @@ function monitorFutureReservations() {
 
             Object.entries(data).forEach(([key, res]) => {
                 const startTime = new Date(res.startTime);
+                const endTime = new Date(res.endTime);
+                const roomId = res.roomId;
+                const cell = document.getElementById(roomId);
 
-                if (now >= startTime) {
-                    const roomId = res.roomId;
-                    const cell = document.getElementById(roomId);
+                // 開始時間到 -> 自動變紅
+                if (now >= startTime && cell && cell.classList.contains('green')) {
+                    cell.classList.remove('green');
+                    cell.classList.add('red');
+                    cell.textContent = `${roomId} - ${res.user} - ${res.startTime} ~ ${res.endTime}`;
 
-                    if (cell && cell.classList.contains('green')) {
-                        cell.classList.remove('green');
-                        cell.classList.add('red');
-                        cell.textContent = `${roomId} - ${res.user}`;
-                    if (res.endTime && now >= new Date(res.endTime)) {
-                        const roomId = res.roomId;
-                        const cell = document.getElementById(roomId);
-                        if (cell && cell.classList.contains('red')) {
-                            cell.classList.remove('red');
-                            cell.classList.add('green');
-                            cell.textContent = roomId;
+                    const colorRef = ref(db, roomId);
+                    set(colorRef, {
+                        color: 'red',
+                        user: res.user,
+                        startTime: res.startTime,
+                        endTime: res.endTime
+                    });
 
-                            const colorRef = ref(db, roomId);
-                            set(colorRef, { color: 'green' });
+                    push(recordsRef, {
+                        id: roomId,
+                        action: '使用中（自動）',
+                        user: res.user,
+                        startTime: res.startTime,
+                        endTime: res.endTime,
+                        time: new Date().toISOString()
+                    });
 
-                            push(recordsRef, {
-                                id: roomId,
-                                action: '空閒（自動）',
-                                user: res.user,
-                                startTime: res.startTime,
-                                endTime: res.endTime,
-                                time: new Date().toISOString()
-                            });
-                        }
-                    }
+                    remove(ref(db, `futureReservations/${key}`));
+                }
 
-                        const colorRef = ref(db, roomId);
-                        set(colorRef, {
-                            color: 'red',
-                            user: res.user,
-                            endTime: res.endTime
-                        });
+                // 結束時間到 -> 自動變綠
+                if (now >= endTime && cell && cell.classList.contains('red')) {
+                    cell.classList.remove('red');
+                    cell.classList.add('green');
+                    cell.textContent = roomId;
 
-                        push(recordsRef, {
-                            id: roomId,
-                            action: '使用中（自動）',
-                            user: res.user,
-                            time: new Date().toISOString(),
-                            endTime: res.endTime
-                        });
-                        remove(ref(db, `futureReservations/${key}`));
-                    }
+                    const colorRef = ref(db, roomId);
+                    set(colorRef, { color: 'green' });
+
+                    push(recordsRef, {
+                        id: roomId,
+                        action: '空閒（自動）',
+                        user: res.user,
+                        startTime: res.startTime,
+                        endTime: res.endTime,
+                        time: new Date().toISOString()
+                    });
                 }
             });
         });
-    }, 10000); //每10秒檢查時間去改變格子狀態
+    }, 10000); // 每 10 秒檢查一次
 }
 
 function populateTimeSelectors() {
@@ -423,7 +423,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
         function toggleColor(element) {
             const id = element.id;
 
-            if(!finalSelectedUser){
+            if (!finalSelectedUser || !finalStartTime || !finalEndTime) {
                 alert("請先套用使用者名稱與時間！");
                 return;
             }
@@ -434,13 +434,13 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                 element.classList.remove('green');
                 element.classList.add('red');
                 element.textContent = `${id} - ${finalSelectedUser} - ${finalStartTime.toLocaleString('zh-TW')} ~ ${finalEndTime.toLocaleString('zh-TW')}`;
-    
+
                 const newRecord = {
                     id: id,
                     action: '使用中',
                     user: finalSelectedUser,
                     startTime: finalStartTime.toISOString(),
-                    endTime: finalEndTime ? finalEndTime.toISOString() : null,
+                    endTime: finalEndTime.toISOString(),
                     time: new Date().toISOString()
                 };
 
@@ -448,12 +448,10 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                     color: 'red',
                     user: finalSelectedUser,
                     startTime: finalStartTime.toISOString(),
-                    endTime: finalEndTime ? finalEndTime.toISOString() : null
+                    endTime: finalEndTime.toISOString()
                 });
 
                 push(recordsRef, newRecord);
-            }
-
 
             } else if (element.classList.contains('red')) {
                 element.classList.remove('red');
@@ -466,10 +464,13 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                     id: id,
                     action: '空閒',
                     user: finalSelectedUser,
+                    startTime: finalStartTime ? finalStartTime.toISOString() : null,
+                    endTime: finalEndTime ? finalEndTime.toISOString() : null,
                     time: new Date().toISOString()
                 });
             }
         }
+
 
         function showRecords() {
             const recordList = document.getElementById("recordList");
@@ -513,10 +514,11 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                     const localTime = recordTime.toLocaleString('zh-TW', options);
 
                     recordItem.textContent = `${record.id} - ${record.action} - ${record.user} - ${
-                    record.startTime ? new Date(record.startTime).toLocaleString('zh-TW') : '未設定'
-                } ~ ${
-                    record.endTime ? new Date(record.endTime).toLocaleString('zh-TW') : '未設定'
-                } - 操作時間: ${localTime}`;
+                        record.startTime ? new Date(record.startTime).toLocaleString('zh-TW') : '未設定'
+                    } ~ ${
+                        record.endTime ? new Date(record.endTime).toLocaleString('zh-TW') : '未設定'
+                    } - 操作時間: ${localTime}`;
+
                     const deleteButton = document.createElement("button");
                     deleteButton.textContent = "刪除";
                     deleteButton.onclick = function() {
@@ -747,4 +749,5 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
