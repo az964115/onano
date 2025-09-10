@@ -26,7 +26,7 @@
         const recordsRef = ref(db, 'records');
 
         const users = [
-            "吳德宏", "王清鴻", "留瑞蓮", "李家維", "李滋芳", "劉俊彥",  "廠商", "其他", "管理者"  // 
+            "吳德宏","王清鴻","留瑞蓮","邱文聰","李家維","許家豪","李滋芳","劉俊彥","蘇修賢","廠商","其他","管理者"   
         ];
 
 let finalSelectedUser = ""; 
@@ -66,8 +66,8 @@ function reserveForFuture() {
     const reservationData = {
         roomId: roomId,
         user: finalSelectedUser,
-        startTime: formattedStartTime,  // 使用格式化的日期字串
-        endTime: formattedEndTime,      // 使用格式化的日期字串
+        startTime: formattedStartTime,  
+        endTime: formattedEndTime,     
     };
 
     const futureRef = ref(db, `futureReservations/${roomId}_${new Date(selectedYear, month - 1, day, startHour, startMinute).getTime()}`);
@@ -167,7 +167,6 @@ function monitorFutureReservations() {
                 const roomId = res.roomId;
                 const cell = document.getElementById(roomId);
 
-                // 開始時間到 -> 自動變紅
                 if (now >= startTime && cell && cell.classList.contains('green')) {
                     cell.classList.remove('green');
                     cell.classList.add('red');
@@ -193,8 +192,6 @@ function monitorFutureReservations() {
 
                     //remove(ref(db, `futureReservations/${key}`));
                 }
-
-                // 結束時間到 -> 自動變綠
                 if (now >= endTime && cell && cell.classList.contains('red')) {
                     cell.classList.remove('red');
                     cell.classList.add('green');
@@ -211,8 +208,6 @@ function monitorFutureReservations() {
                         endTime: res.endTime,
                         time: new Date().toISOString()
                     });
-
-                    // ✅ 在這裡才移除
                     remove(ref(db, `futureReservations/${key}`));
                 }
 
@@ -313,10 +308,8 @@ const applyCustomUserAndTime = () => {
         parseInt(endMinute)
     );
 
-    // ✅ 只存名字
     finalSelectedUser = user;
 
-    // ✅ 顯示用：名字 + 時間段
     const displayInfo = `${user} - ${selectedYear}/${month.padStart(2, '0')}/${day.padStart(2, '0')} ${startHour}:${startMinute} ~ ${selectedYear}/${month.padStart(2, '0')}/${day.padStart(2, '0')} ${endHour}:${endMinute}`;
 
     localStorage.setItem("selectedUser", finalSelectedUser);
@@ -348,7 +341,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
             }
 
             const customInput = document.getElementById("customUserInput");
-            customInput.disabled = true; // 初始為關閉
+            customInput.disabled = true;
             userSelect.addEventListener("change", (e) => {
     const selectedUser = e.target.value;
     if (selectedUser === "管理者") {
@@ -755,8 +748,3 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
-
-
-
-
-
