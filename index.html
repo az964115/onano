@@ -57,8 +57,9 @@ function reserveForFuture() {
     const startTime = new Date(selectedYear, month - 1, day, startHour, startMinute);
     const endTime = new Date(selectedYear, month - 1, day, endHour, endMinute);
 
-    const formattedStartTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${startHour}:${startMinute}`;
-    const formattedEndTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${endHour}:${endMinute}`;
+    const formattedStartTime = `${selectedYear}/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${startHour}:${startMinute}`;
+    const formattedEndTime   = `${selectedYear}/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${endHour}:${endMinute}`;
+
 
     
     const reservationData = {
@@ -119,10 +120,7 @@ function loadFutureReservations() {
 
             const fullDateStr = `${res.startTime} ~ ${res.endTime}`;
             
-            li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${res.startTime}）`;
-
-
-
+            li.textContent = `會議室${res.roomId} - ${res.user} - ${res.startTime} ~ ${res.endTime}（開始時間${res.startTime}）`;
 
             if (isAdmin) {
                 const deleteBtn = document.createElement("button");
@@ -713,6 +711,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
