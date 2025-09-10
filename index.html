@@ -60,6 +60,7 @@ function reserveForFuture() {
     const formattedStartTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${startHour}:${startMinute}`;
     const formattedEndTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${endHour}:${endMinute}`;
 
+    
     const reservationData = {
         roomId: roomId,
         user: finalSelectedUser,
@@ -116,7 +117,7 @@ function loadFutureReservations() {
             const endHour = end.getHours().toString().padStart(2, '0');
             const endMin = end.getMinutes().toString().padStart(2, '0');
 
-            const fullDateStr = `${res.endTime}~${res.endTime}`;
+            const fullDateStr = `${res.startTime}~${res.endTime}`;
             const friendlyStart = `${res.startTime}`;
             
             li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${friendlyStart}）`;
@@ -264,17 +265,27 @@ const applyCustomUserAndTime = () => {
         }
     }
 
-    if (!month || !day || !startHour || !startMinute || !endHour || !endMinute) {
-        alert("請完整選擇時間（月份、日期、開始時間、結束時間）");
-        return;
-    }
-
     const user = dropdownUser === "其他" ? customName : dropdownUser;
     const fullStartTimeString = `${selectedYear}-${parseInt(month).toString().padStart(2, '0')}-${parseInt(day).toString().padStart(2, '0')} ${startHour}:${startMinute}`;
     const fullEndTimeString = `${selectedYear}-${parseInt(month).toString().padStart(2, '0')}-${parseInt(day).toString().padStart(2, '0')} ${endHour}:${endMinute}`;
     const finalUserInfo = `${user} - ${fullTimeString}`;
 
     const selectedYear = document.getElementById("yearSelect").value;
+    if (!month || !day || !startHour || !startMinute || !endHour || !endMinute) {
+        alert("請完整選擇時間（月份、日期、開始時間、結束時間）");
+        return;
+    }
+
+    const formattedStartTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${startHour}:${startMinute}`;
+    const formattedEndTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${endHour}:${endMinute}`;
+    
+    const reservationData = {
+        roomId: roomId,
+        user: finalSelectedUser,
+        startTime: formattedStartTime,  // 使用格式化的日期字串
+        endTime: formattedEndTime,      // 使用格式化的日期字串
+    };
+    
     finalEndTime = new Date(
         parseInt(selectedYear),
         parseInt(month) - 1,
@@ -711,6 +722,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
