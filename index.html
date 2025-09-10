@@ -183,12 +183,13 @@ function monitorFutureReservations() {
 
                     push(recordsRef, {
                         id: roomId,
-                        action: '使用中（自動）',
+                        action: '使用中（預約自動）',
                         user: res.user,
                         startTime: res.startTime,
                         endTime: res.endTime,
                         time: new Date().toISOString()
                     });
+
 
                     remove(ref(db, `futureReservations/${key}`));
                 }
@@ -204,13 +205,14 @@ function monitorFutureReservations() {
 
                     push(recordsRef, {
                         id: roomId,
-                        action: '空閒（自動）',
+                        action: '空閒（預約自動）',
                         user: res.user,
                         startTime: res.startTime,
                         endTime: res.endTime,
                         time: new Date().toISOString()
                     });
                 }
+
             });
         });
     }, 10000); // 每 10 秒檢查一次
@@ -749,5 +751,6 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
