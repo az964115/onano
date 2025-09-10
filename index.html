@@ -164,14 +164,18 @@ function monitorFutureReservations() {
             Object.entries(data).forEach(([key, res]) => {
                 const startTime = new Date(res.startTime);
 
-                if (now >= startTime) {
-                    const roomId = res.roomId;
+                if (now >= startTime && now < new Date(res.endTime)) {
+                    // → 變紅
+                } else if (now >= new Date(res.endTime)) {
+                    // → 變綠
                     const cell = document.getElementById(roomId);
-
-                    if (cell && cell.classList.contains('green')) {
-                        cell.classList.remove('green');
-                        cell.classList.add('red');
-                        cell.textContent = `${roomId} - ${res.user}`;
+                    if (cell && cell.classList.contains('red')) {
+                        cell.classList.remove('red');
+                        cell.classList.add('green');
+                        cell.textContent = roomId;
+                        set(ref(db, roomId), { color: 'green' });
+                    }
+                }
 
                         const colorRef = ref(db, roomId);
                         set(colorRef, {
@@ -402,7 +406,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
         function toggleColor(element) {
             const id = element.id;
 
-            if(!finalSelectedUser){
+            if(!finalSelectedUser || !finalStartTime || !finalEndTime){
                 alert("請先套用使用者名稱與時間！");
                 return;
             }
@@ -413,20 +417,22 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                 element.classList.remove('green');
                 element.classList.add('red');
                 // 
-                element.textContent = `${id} - ${finalSelectedUser}`;
+                element.textContent = `${id} - ${finalSelectedUser} - ${finalStartTime.toLocaleString()} ~ ${finalEndTime.toLocaleString()}`;
 
                 const newRecord = {
                     id: id,
                     action: '使用中',
                     user: finalSelectedUser,
-                    time: new Date().toISOString(),
-                    endTime: finalEndTime ? finalEndTime.toISOString() : null
+                    startTime: finalStartTime.toISOString(),
+                    endTime: finalEndTime.toISOString(),
+                    time: new Date().toISOString()
                 };
 
                 set(colorRef, {
                     color: 'red',
                     user: finalSelectedUser,
-                    endTime: finalEndTime ? finalEndTime.toISOString() : null
+                    startTime: finalStartTime.toISOString(),
+                    endTime: finalEndTime.toISOString()
                 });
 
                 push(recordsRef, newRecord);
@@ -488,7 +494,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                     };
                     const localTime = recordTime.toLocaleString('zh-TW', options);
 
-                    recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${localTime}`;
+                    recordItem.textContent = `${record.id} - ${record.action} (${record.user}${record.startTime && record.endTime ? ' - ' + record.startTime + ' ~ ' + record.endTime : ''}) - ${localTime}`;
 
                     const deleteButton = document.createElement("button");
                     deleteButton.textContent = "刪除";
@@ -720,6 +726,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
