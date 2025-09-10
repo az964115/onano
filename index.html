@@ -191,7 +191,7 @@ function monitorFutureReservations() {
                     });
 
 
-                    remove(ref(db, `futureReservations/${key}`));
+                    //remove(ref(db, `futureReservations/${key}`));
                 }
 
                 // 結束時間到 -> 自動變綠
@@ -211,7 +211,11 @@ function monitorFutureReservations() {
                         endTime: res.endTime,
                         time: new Date().toISOString()
                     });
+
+                    // ✅ 在這裡才移除
+                    remove(ref(db, `futureReservations/${key}`));
                 }
+
 
             });
         });
@@ -410,11 +414,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                         cell.classList.remove('green', 'red');
                         cell.classList.add(data.color);
                         if (data.color === 'red') {
-                            cell.textContent = `${id} - ${data.user} - ${
-                                data.startTime ? new Date(data.startTime).toLocaleString('zh-TW') : ''
-                            } ~ ${
-                                data.endTime ? new Date(data.endTime).toLocaleString('zh-TW') : ''
-                            }`;
+                            cell.textContent = `${id} - ${data.user} - ${new Date(data.startTime).toLocaleString('zh-TW')} ~ ${new Date(data.endTime).toLocaleString('zh-TW')}`;
                         } else {
                             cell.textContent = `${id}`;
                         }
@@ -755,6 +755,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
