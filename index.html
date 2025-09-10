@@ -117,10 +117,10 @@ function loadFutureReservations() {
             const endHour = end.getHours().toString().padStart(2, '0');
             const endMin = end.getMinutes().toString().padStart(2, '0');
 
-            const fullDateStr = `${res.startTime}~${res.endTime}`;
-            const friendlyStart = `${res.startTime}`;
+            const fullDateStr = `${res.startTime} ~ ${res.endTime}`;
             
-            li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${friendlyStart}）`;
+            li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${res.startTime}）`;
+
 
 
 
@@ -713,6 +713,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
