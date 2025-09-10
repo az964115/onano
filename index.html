@@ -172,6 +172,27 @@ function monitorFutureReservations() {
                         cell.classList.remove('green');
                         cell.classList.add('red');
                         cell.textContent = `${roomId} - ${res.user}`;
+                    if (res.endTime && now >= new Date(res.endTime)) {
+                        const roomId = res.roomId;
+                        const cell = document.getElementById(roomId);
+                        if (cell && cell.classList.contains('red')) {
+                            cell.classList.remove('red');
+                            cell.classList.add('green');
+                            cell.textContent = roomId;
+
+                            const colorRef = ref(db, roomId);
+                            set(colorRef, { color: 'green' });
+
+                            push(recordsRef, {
+                                id: roomId,
+                                action: '空閒（自動）',
+                                user: res.user,
+                                startTime: res.startTime,
+                                endTime: res.endTime,
+                                time: new Date().toISOString()
+                            });
+                        }
+                    }
 
                         const colorRef = ref(db, roomId);
                         set(colorRef, {
@@ -412,24 +433,27 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
             if (element.classList.contains('green')) {
                 element.classList.remove('green');
                 element.classList.add('red');
-                // 
-                element.textContent = `${id} - ${finalSelectedUser}`;
-
+                element.textContent = `${id} - ${finalSelectedUser} - ${finalStartTime.toLocaleString('zh-TW')} ~ ${finalEndTime.toLocaleString('zh-TW')}`;
+    
                 const newRecord = {
                     id: id,
                     action: '使用中',
                     user: finalSelectedUser,
-                    time: new Date().toISOString(),
-                    endTime: finalEndTime ? finalEndTime.toISOString() : null
+                    startTime: finalStartTime.toISOString(),
+                    endTime: finalEndTime ? finalEndTime.toISOString() : null,
+                    time: new Date().toISOString()
                 };
 
                 set(colorRef, {
                     color: 'red',
                     user: finalSelectedUser,
+                    startTime: finalStartTime.toISOString(),
                     endTime: finalEndTime ? finalEndTime.toISOString() : null
                 });
 
                 push(recordsRef, newRecord);
+            }
+
 
             } else if (element.classList.contains('red')) {
                 element.classList.remove('red');
@@ -488,8 +512,11 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
                     };
                     const localTime = recordTime.toLocaleString('zh-TW', options);
 
-                    recordItem.textContent = `${record.id} - ${record.action} (${record.user}) - ${localTime}`;
-
+                    recordItem.textContent = `${record.id} - ${record.action} - ${record.user} - ${
+                    record.startTime ? new Date(record.startTime).toLocaleString('zh-TW') : '未設定'
+                } ~ ${
+                    record.endTime ? new Date(record.endTime).toLocaleString('zh-TW') : '未設定'
+                } - 操作時間: ${localTime}`;
                     const deleteButton = document.createElement("button");
                     deleteButton.textContent = "刪除";
                     deleteButton.onclick = function() {
@@ -720,3 +747,4 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
