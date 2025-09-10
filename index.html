@@ -53,12 +53,16 @@ function reserveForFuture() {
     const today = new Date();
     const year = today.getFullYear();
     const startTime = new Date(selectedYear, month - 1, day, startHour, startMinute);
+    const endTime = new Date(selectedYear, month - 1, day, endHour, endMinute);
+
+    const formattedStartTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${startHour}:${startMinute}`;
+    const formattedEndTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${endHour}:${endMinute}`;
 
     const reservationData = {
         roomId: roomId,
         user: finalSelectedUser,
-        startTime: startTime.toISOString(),
-        endTime: finalEndTime.toISOString()
+        startTime: formattedStartTime,  // 使用格式化的日期字串
+        endTime: formattedEndTime,      // 使用格式化的日期字串
     };
 
     const futureRef = ref(db, `futureReservations/${roomId}_${startTime.getTime()}`);
@@ -110,10 +114,10 @@ function reserveForFuture() {
             const endHour = end.getHours().toString().padStart(2, '0');
             const endMin = end.getMinutes().toString().padStart(2, '0');
 
-            const fullDateStr = `${year}-${month}/${date} ${startHour}:${startMin}~${endHour}:${endMin}`;
-            const friendlyStart = `${month}/${date} ${startHour}:${startMin}`;
-
+            const fullDateStr = `${res.endTime}~${res.endTime}`;
+            const friendlyStart = `${res.startTime}`;
             li.textContent = `會議室${res.roomId} - ${res.user} - ${fullDateStr}（開始時間${friendlyStart}）`;
+
 
 
             if (isAdmin) {
@@ -704,6 +708,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
