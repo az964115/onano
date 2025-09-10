@@ -246,6 +246,7 @@ const applyCustomUserAndTime = () => {
     const dropdownUser = document.getElementById("userSelect").value;
     const customName = document.getElementById("customUserInput").value.trim();
 
+    const selectedYear = document.getElementById("yearSelect").value;
     const month = document.getElementById("monthSelect").value;
     const day = document.getElementById("daySelect").value;
     const startHour = document.getElementById("startHour").value;
@@ -266,26 +267,15 @@ const applyCustomUserAndTime = () => {
     }
 
     const user = dropdownUser === "其他" ? customName : dropdownUser;
-    const fullStartTimeString = `${selectedYear}-${parseInt(month).toString().padStart(2, '0')}-${parseInt(day).toString().padStart(2, '0')} ${startHour}:${startMinute}`;
-    const fullEndTimeString = `${selectedYear}-${parseInt(month).toString().padStart(2, '0')}-${parseInt(day).toString().padStart(2, '0')} ${endHour}:${endMinute}`;
-    const finalUserInfo = `${user} - ${fullTimeString}`;
 
-    const selectedYear = document.getElementById("yearSelect").value;
     if (!month || !day || !startHour || !startMinute || !endHour || !endMinute) {
-        alert("請完整選擇時間（月份、日期、開始時間、結束時間）");
+        alert("請完整選擇時間（年份、月份、日期、開始時間、結束時間）");
         return;
     }
 
-    const formattedStartTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${startHour}:${startMinute}`;
-    const formattedEndTime = `${selectedYear}-${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${endHour}:${endMinute}`;
-    
-    const reservationData = {
-        roomId: roomId,
-        user: finalSelectedUser,
-        startTime: formattedStartTime,  // 使用格式化的日期字串
-        endTime: formattedEndTime,      // 使用格式化的日期字串
-    };
-    
+    const fullStartTimeString = `${selectedYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${startHour}:${startMinute}`;
+    const fullEndTimeString   = `${selectedYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${endHour}:${endMinute}`;
+
     finalEndTime = new Date(
         parseInt(selectedYear),
         parseInt(month) - 1,
@@ -294,18 +284,19 @@ const applyCustomUserAndTime = () => {
         parseInt(endMinute)
     );
 
-    finalSelectedUser = finalUserInfo;
+    finalSelectedUser = `${user} - ${fullStartTimeString} ~ ${fullEndTimeString}`;
 
-    localStorage.setItem("selectedUser", finalUserInfo);
+    localStorage.setItem("selectedUser", finalSelectedUser);
 
-    alert(`✅ 已套用：${finalUserInfo}`);
+    alert(`✅ 已套用：${finalSelectedUser}`);
 
     const infoElem = document.getElementById("currentUserInfo");
     if(infoElem){
-        infoElem.textContent = `已套用使用者：${finalUserInfo}`;
+        infoElem.textContent = `已套用使用者：${finalSelectedUser}`;
         infoElem.style.color = "green";
     }
-}
+};
+
 window.applyCustomUserAndTime = applyCustomUserAndTime;
 
         window.onload = function() {
@@ -722,6 +713,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
