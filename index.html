@@ -29,7 +29,8 @@
             "吳德宏", "王清鴻", "留瑞蓮", "李家維", "李滋芳", "劉俊彥",  "廠商", "其他", "管理者"  // 
         ];
 
-    let finalSelectedUser = ""; 
+let finalSelectedUser = ""; 
+let finalStartTime = null;
 let finalEndTime = null;   
 
 function reserveForFuture() {
@@ -265,7 +266,10 @@ const applyCustomUserAndTime = () => {
     }
 
     const user = dropdownUser === "其他" ? customName : dropdownUser;
+    finalStartTime = new Date(selectedYear, month - 1, day, startHour, startMinute);
+    finalEndTime   = new Date(selectedYear, month - 1, day, endHour, endMinute);
 
+    finalSelectedUser = user;
     if (!month || !day || !startHour || !startMinute || !endHour || !endMinute) {
         alert("請完整選擇時間（年份、月份、日期、開始時間、結束時間）");
         return;
@@ -286,7 +290,7 @@ const applyCustomUserAndTime = () => {
     finalSelectedUser = user;
 
     // ✅ 顯示用：名字 + 時間段
-    const displayInfo = `${user} - ${fullStartTimeString} ~ ${fullEndTimeString}`;
+    const displayInfo = `${user} - ${selectedYear}/${month.padStart(2, '0')}/${day.padStart(2, '0')} ${startHour}:${startMinute} ~ ${selectedYear}/${month.padStart(2, '0')}/${day.padStart(2, '0')} ${endHour}:${endMinute}`;
 
     localStorage.setItem("selectedUser", finalSelectedUser);
 
@@ -716,6 +720,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
