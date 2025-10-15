@@ -36,7 +36,7 @@ let finalEndTime = null;
 
 function reserveForFuture() {
     if (!finalSelectedUser || !finalEndTime) {
-        alert("請先套用使用者與時間！");
+        alert("請先套用使用者與時間！注意事項:點擊預約後會跑到上方預約處，不用再到下方手動點擊格子，會需要手動點擊格子的情況是馬上要用，或是已經正在進行，若是未來時段，請使用"預約"即可");
         return;
     }
 
@@ -424,7 +424,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
             const id = element.id;
 
             if (!finalSelectedUser || !finalStartTime || !finalEndTime) {
-                alert("請先套用使用者名稱與時間！");
+                alert("請先套用使用者名稱與時間！注意事項:點擊預約後會跑到上方預約處，不用再到下方手動點擊格子，會需要手動點擊格子的情況是馬上要用，或是已經正在進行，若是未來時段，請使用"預約"即可");
                 return;
             }
 
@@ -749,6 +749,7 @@ window.applyCustomUserAndTime = applyCustomUserAndTime;
 
 </body>
 </html>
+
 
 
 
