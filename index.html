@@ -269,7 +269,6 @@
             }).catch(err => alert("預約失敗：" + err));
         }
 
-        // === 載入行程（包含即將到來區塊） ===
         function loadFutureReservations() {
             const listElem = document.getElementById("futureReservationsList");
             const upcomingList = document.getElementById("upcomingList");
@@ -307,9 +306,8 @@
                     }
                     listElem.appendChild(li);
 
-                    // 2. 產生上方「即將到來」精美卡片 (顯示尚未結束的排程，最多5筆)
                     const resEndTime = new Date(res.endTime);
-                    if (resEndTime >= now && upcomingCount < 5) {
+                    if (resEndTime >= now && upcomingCount < 8) {
                         upcomingCount++;
                         const card = document.createElement("div");
                         card.className = "upcoming-item-card";
